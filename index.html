@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>당비비 PPL+Arms 고밀도 트래커</title>
+<title>PPL</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #fff; margin: 0; padding: 12px; }
-  h1 { font-size: 1.05rem; text-align: center; color: #4dabf7; margin: 4px 0 10px 0; }
+  h1 { font-size: 1.2rem; text-align: center; color: #4dabf7; margin: 4px 0 10px 0; font-weight: 800; }
   .tab-group { display: flex; gap: 6px; margin-bottom: 10px; }
   .tab-btn { flex: 1; padding: 10px; background: #2a2a2a; color: #aaa; border: 1px solid #444; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
   .tab-btn.active { background: #1971c2; color: #fff; border-color: #339af0; }
@@ -43,7 +43,7 @@
 </head>
 <body>
 
-<h1>당비비 롤링 PPL+Arms 고밀도 트래커</h1>
+<h1>PPL</h1>
 
 <div class="tab-group">
   <button class="tab-btn active" onclick="switchTab('push')">Push</button>
@@ -112,7 +112,6 @@ setInterval(() => {
   document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
 }, 1000);
 
-// 직전 Pull 세션 데드리프트 성공 반영 (135kg -> 137.5kg)
 const defaultWeights = {
   push: { benchTop: 85, ohpTop: 45 },
   pull: { deadTop: 137.5, rowMain: 60 },
@@ -121,12 +120,12 @@ const defaultWeights = {
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v14');
+  const saved = localStorage.getItem('ppl_arms_weights_v15');
   return saved ? JSON.parse(saved) : defaultWeights;
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v14', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v15', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -348,12 +347,12 @@ function startTimer(seconds) {
     const timeStr = `${m}:${s}`;
     
     display.textContent = timeStr;
-    document.title = `[${timeStr}] 당비비 트래커`;
+    document.title = `[${timeStr}] PPL`;
     
     if (remainingSec <= 0) {
       clearInterval(timerInterval);
       display.textContent = "00:00 (종료)";
-      document.title = "⏰ [휴식 끝!] 당비비 트래커";
+      document.title = "⏰ [휴식 끝!] PPL";
       triggerCleanAlarm();
     }
   };

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>당비비 PPL+Arms 고밀도 트래커</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #fff; margin: 0; padding: 12px; }
+  h1 { font-size: 1.05rem; text-align: center; color: #4dabf7; margin: 4px 0 10px 0; }
+  .tab-group { display: flex; gap: 6px; margin-bottom: 10px; }
+  .tab-btn { flex: 1; padding: 10px; background: #2a2a2a; color: #aaa; border: 1px solid #444; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
+  .tab-btn.active { background: #1971c2; color: #fff; border-color: #339af0; }
+  
+  .monitor-box { position: sticky; top: 0; background: #181818; padding: 10px 14px; border-radius: 8px; border: 2px solid #339af0; z-index: 999; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+  .monitor-item { text-align: center; flex: 1; }
+  .monitor-label { font-size: 0.72rem; color: #adb5bd; font-weight: bold; margin-bottom: 2px; }
+  .timer-val { font-size: 1.9rem; font-weight: 900; color: #ff6b6b; font-variant-numeric: tabular-nums; }
+  .elapsed-val { font-size: 1.4rem; font-weight: bold; color: #51cf66; font-variant-numeric: tabular-nums; }
+  
+  .card { background: #1e1e1e; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #2a2a2a; }
+  .card-title { font-size: 0.88rem; font-weight: bold; margin-bottom: 6px; color: #ffd43b; }
+  .set-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #2a2a2a; font-size: 0.8rem; }
+  .set-row:last-child { border-bottom: none; }
+  .warmup-text { color: #868e96; }
+  .input-reps { width: 40px; background: #2a2a2a; border: 1px solid #444; color: #fff; text-align: center; border-radius: 4px; padding: 4px; font-size: 0.85rem; }
+  input[type="checkbox"] { width: 24px; height: 24px; accent-color: #4dabf7; margin-left: 8px; cursor: pointer; }
+  .right-controls { display: flex; align-items: center; }
+  
+  .meta-box { background: #1e1e1e; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; gap: 8px; justify-content: space-between; }
+  .meta-field { flex: 1; display: flex; flex-direction: column; font-size: 0.78rem; }
+  .meta-field select { background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 6px; margin-top: 4px; font-size: 0.78rem; }
+  
+  .stats-box { background: #252525; padding: 12px; border-radius: 8px; text-align: center; margin-top: 14px; }
+  .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+  .btn-copy { background: #1971c2; color: white; border: none; padding: 12px 18px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; }
+  .btn-reset { background: #e03131; color: white; border: none; padding: 10px 14px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; }
+  .log-msg { font-size: 0.8rem; margin-top: 8px; font-weight: bold; }
+  .success { color: #51cf66; }
+  .failed { color: #ff922b; }
+  
+  #manual-copy-area { width: 100%; height: 140px; background: #111; color: #74c0fc; border: 1px solid #339af0; border-radius: 6px; margin-top: 12px; padding: 8px; font-size: 0.75rem; box-sizing: border-box; display: none; }
+</style>
+</head>
+<body>
+
+<h1>당비비 롤링 PPL+Arms 고밀도 트래커</h1>
+
+<div class="tab-group">
+  <button class="tab-btn active" onclick="switchTab('push')">Push</button>
+  <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
+  <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
+  <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
+</div>
+
+<div class="monitor-box">
+  <div class="monitor-item">
+    <div class="monitor-label">휴식 타이머 (90초)</div>
+    <div class="timer-val" id="rest-timer">01:30</div>
+  </div>
+  <div class="monitor-item" style="border-left: 1px solid #333; padding-left: 8px;">
+    <div class="monitor-label">총 세션 소요 시간</div>
+    <div class="elapsed-val" id="elapsed-timer">00:00</div>
+  </div>
+</div>
+
+<div class="meta-box">
+  <div class="meta-field">
+    <label>세션 RPE (체감 피로도)</label>
+    <select id="session-rpe">
+      <option value="6">RPE 6 (여유 많음)</option>
+      <option value="7">RPE 7 (3회 더 가능)</option>
+      <option value="8" selected>RPE 8 (2회 더 가능 - 적정)</option>
+      <option value="8.5">RPE 8.5 (1~2회 가능)</option>
+      <option value="9">RPE 9 (1회 더 가능)</option>
+      <option value="9.5">RPE 9.5 (한계 근접)</option>
+      <option value="10">RPE 10 (완전 탈진)</option>
+    </select>
+  </div>
+  <div class="meta-field">
+    <label>직전 수면 시간</label>
+    <select id="session-sleep">
+      <option value="4시간 이하">4시간 이하 (수면 부족)</option>
+      <option value="5시간">5시간</option>
+      <option value="6시간">6시간</option>
+      <option value="7시간" selected>7시간 (적정)</option>
+      <option value="8시간 이상">8시간 이상 (충분)</option>
+    </select>
+  </div>
+</div>
+
+<div id="routine-container"></div>
+
+<div class="stats-box">
+  <div>현재 총 볼륨: <span id="total-volume" style="font-weight: bold; color: #4dabf7; font-size: 1.1rem;">0</span> kg</div>
+  <div id="status-msg" class="log-msg"></div>
+  <div class="btn-group">
+    <button class="btn-copy" onclick="copyResults()">정밀 분석 데이터 복사</button>
+    <button class="btn-reset" onclick="resetData()">중량 초기화</button>
+  </div>
+  <textarea id="manual-copy-area" readonly placeholder="결과 데이터가 여기에 노출돼. 버튼 클릭 시 자동 복사가 안 되면 여기를 길게 눌러 복사해 줘."></textarea>
+</div>
+
+<script>
+const FIXED_REST = 90;
+let currentTab = 'push';
+
+let elapsedSeconds = 0;
+setInterval(() => {
+  elapsedSeconds++;
+  const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+  const s = String(elapsedSeconds % 60).padStart(2, '0');
+  document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
+}, 1000);
+
+// 직전 Pull 세션 데드리프트 성공 반영 (135kg -> 137.5kg)
+const defaultWeights = {
+  push: { benchTop: 85, ohpTop: 45 },
+  pull: { deadTop: 137.5, rowMain: 60 },
+  legs: { squatTop: 92.5, rdlMain: 80 },
+  arms: { curlMain: 30, skullMain: 20 }
+};
+
+function getWeights() {
+  const saved = localStorage.getItem('ppl_arms_weights_v14');
+  return saved ? JSON.parse(saved) : defaultWeights;
+}
+
+function saveWeights(data) {
+  localStorage.setItem('ppl_arms_weights_v14', JSON.stringify(data));
+}
+
+let weights = getWeights();
+
+function getRoutines() {
+  return {
+    push: [
+      {
+        name: "1. 바벨 벤치프레스 (웜업 + 탑세트)",
+        part: "가슴",
+        sets: [
+          { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
+          { type: "웜업 2", weight: 50, targetReps: 5, isWarmup: true },
+          { type: "웜업 3", weight: 70, targetReps: 2, isWarmup: true },
+          { type: "Top Set", weight: weights.push.benchTop, targetReps: 3, isWarmup: false },
+          { type: "Back-off 1", weight: weights.push.benchTop - 10, targetReps: 8, isWarmup: false },
+          { type: "Back-off 2", weight: weights.push.benchTop - 10, targetReps: 8, isWarmup: false },
+          { type: "Back-off 3", weight: weights.push.benchTop - 20, targetReps: 10, isWarmup: false }
+        ]
+      },
+      {
+        name: "2. 바벨 OHP (탑세트 + 백오프)",
+        part: "어깨",
+        sets: [
+          { type: "Top Set", weight: weights.push.ohpTop, targetReps: 5, isWarmup: false },
+          { type: "Back-off 1", weight: weights.push.ohpTop - 7.5, targetReps: 8, isWarmup: false },
+          { type: "Back-off 2", weight: weights.push.ohpTop - 7.5, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "3. 인클라인 덤벨 프레스 (각 24kg)",
+        part: "가슴",
+        sets: [
+          { type: "본세트 1", weight: 48, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: 48, targetReps: 8, isWarmup: false },
+          { type: "본세트 3", weight: 48, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "4. [슈퍼세트] 덤벨 사레레(각 8kg) + 리어델트(각 8kg)",
+        part: "어깨",
+        sets: [
+          { type: "슈퍼세트 1", weight: 32, targetReps: 15, isWarmup: false, desc: "사레레 16kg + 리어델트 16kg" },
+          { type: "슈퍼세트 2", weight: 32, targetReps: 15, isWarmup: false, desc: "사레레 16kg + 리어델트 16kg" },
+          { type: "슈퍼세트 3", weight: 32, targetReps: 15, isWarmup: false, desc: "사레레 16kg + 리어델트 16kg" },
+          { type: "슈퍼세트 4", weight: 32, targetReps: 12, isWarmup: false, desc: "사레레 16kg + 리어델트 16kg" }
+        ]
+      },
+      {
+        name: "5. 덤벨 라잉 트라이셉스 익스텐션 (라트익 각 10kg)",
+        part: "삼두",
+        sets: [
+          { type: "본세트 1", weight: 20, targetReps: 12, isWarmup: false },
+          { type: "본세트 2", weight: 20, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: 20, targetReps: 10, isWarmup: false }
+        ]
+      }
+    ],
+    pull: [
+      {
+        name: "1. 컨벤셔널 데드리프트 (웜업 + 탑세트)",
+        part: "등/후면사슬",
+        sets: [
+          { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
+          { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
+          { type: "웜업 3", weight: 120, targetReps: 1, isWarmup: true },
+          { type: "Top Set", weight: weights.pull.deadTop, targetReps: 3, isWarmup: false },
+          { type: "Back-off 1", weight: weights.pull.deadTop - 15, targetReps: 5, isWarmup: false },
+          { type: "Back-off 2", weight: weights.pull.deadTop - 15, targetReps: 5, isWarmup: false }
+        ]
+      },
+      {
+        name: "2. 바벨 벤트오버 로우",
+        part: "등",
+        sets: [
+          { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
+          { type: "본세트 3", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "3. 원암 덤벨 로우 (각 24kg)",
+        part: "등",
+        sets: [
+          { type: "본세트 1", weight: 24, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: 24, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: 24, targetReps: 10, isWarmup: false }
+        ]
+      },
+      {
+        name: "4. 바벨 바이셉스 컬",
+        part: "이두",
+        sets: [
+          { type: "본세트 1", weight: 30, targetReps: 12, isWarmup: false },
+          { type: "본세트 2", weight: 30, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: 30, targetReps: 10, isWarmup: false }
+        ]
+      }
+    ],
+    legs: [
+      {
+        name: "1. 백 스쿼트 (웜업 + 탑세트)",
+        part: "하체(대퇴/둔근)",
+        sets: [
+          { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
+          { type: "웜업 2", weight: 60, targetReps: 5, isWarmup: true },
+          { type: "웜업 3", weight: 80, targetReps: 2, isWarmup: true },
+          { type: "Top Set", weight: weights.legs.squatTop, targetReps: 3, isWarmup: false },
+          { type: "Back-off 1", weight: weights.legs.squatTop - 10, targetReps: 6, isWarmup: false },
+          { type: "Back-off 2", weight: weights.legs.squatTop - 10, targetReps: 6, isWarmup: false },
+          { type: "Back-off 3", weight: weights.legs.squatTop - 20, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "2. 바벨 루마니안 데드리프트 (RDL)",
+        part: "하체(햄스트링/둔근)",
+        sets: [
+          { type: "본세트 1", weight: weights.legs.rdlMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: weights.legs.rdlMain, targetReps: 8, isWarmup: false },
+          { type: "본세트 3", weight: weights.legs.rdlMain, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "3. 불가리안 스플릿 스쿼트 (각 12kg)",
+        part: "하체(편측)",
+        sets: [
+          { type: "본세트 1", weight: 24, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: 24, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: 24, targetReps: 8, isWarmup: false }
+        ]
+      },
+      {
+        name: "4. 바벨 카프 레이즈",
+        part: "종아리",
+        sets: [
+          { type: "본세트 1", weight: 60, targetReps: 15, isWarmup: false },
+          { type: "본세트 2", weight: 60, targetReps: 15, isWarmup: false },
+          { type: "본세트 3", weight: 60, targetReps: 15, isWarmup: false }
+        ]
+      }
+    ],
+    arms: [
+      {
+        name: "1. 바벨 바이셉스 컬 (이두 주동)",
+        part: "이두",
+        sets: [
+          { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 12, isWarmup: false },
+          { type: "본세트 2", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false }
+        ]
+      },
+      {
+        name: "2. 덤벨 라잉 트라이셉스 익스텐션 (각 10kg)",
+        part: "삼두",
+        sets: [
+          { type: "본세트 1", weight: weights.arms.skullMain, targetReps: 12, isWarmup: false },
+          { type: "본세트 2", weight: weights.arms.skullMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: weights.arms.skullMain, targetReps: 10, isWarmup: false }
+        ]
+      },
+      {
+        name: "3. [슈퍼세트] 덤벨 해머 컬(각 10kg) + 덤벨 킥백(각 7kg)",
+        part: "상완근/삼두",
+        sets: [
+          { type: "슈퍼세트 1", weight: 34, targetReps: 12, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" },
+          { type: "슈퍼세트 2", weight: 34, targetReps: 12, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" },
+          { type: "슈퍼세트 3", weight: 34, targetReps: 10, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" }
+        ]
+      }
+    ]
+  };
+}
+
+let timerInterval = null;
+let audioCtx = null;
+
+function unlockAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function triggerCleanAlarm() {
+  unlockAudio();
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+  } catch (e) {}
+
+  if ("vibrate" in navigator) {
+    navigator.vibrate(300);
+  }
+}
+
+function startTimer(seconds) {
+  unlockAudio();
+  clearInterval(timerInterval);
+  
+  const targetTime = Date.now() + seconds * 1000;
+  const display = document.getElementById("rest-timer");
+  
+  const tick = () => {
+    const remainingMs = targetTime - Date.now();
+    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+    
+    const m = String(Math.floor(remainingSec / 60)).padStart(2, '0');
+    const s = String(remainingSec % 60).padStart(2, '0');
+    const timeStr = `${m}:${s}`;
+    
+    display.textContent = timeStr;
+    document.title = `[${timeStr}] 당비비 트래커`;
+    
+    if (remainingSec <= 0) {
+      clearInterval(timerInterval);
+      display.textContent = "00:00 (종료)";
+      document.title = "⏰ [휴식 끝!] 당비비 트래커";
+      triggerCleanAlarm();
+    }
+  };
+  
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === tab);
+  });
+  document.getElementById("manual-copy-area").style.display = "none";
+  render();
+  calc();
+}
+
+function render() {
+  const container = document.getElementById("routine-container");
+  container.innerHTML = "";
+  const curRoutine = getRoutines()[currentTab];
+  
+  curRoutine.forEach(exercise => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.exName = exercise.name;
+    card.dataset.part = exercise.part;
+    card.innerHTML = `<div class="card-title">${exercise.name} <span style="font-size:0.75rem; color:#aaa;">[${exercise.part}]</span></div>`;
+    
+    exercise.sets.forEach(set => {
+      const row = document.createElement("div");
+      row.className = "set-row";
+      row.dataset.setType = set.type;
+      const labelText = set.desc ? `${set.type} - <b>${set.desc}</b>` : `${set.type} - <b>${set.weight}kg</b> × 목표 ${set.targetReps}회`;
+      const textClass = set.isWarmup ? "warmup-text" : "";
+      
+      row.innerHTML = `
+        <span class="${textClass}">${labelText}</span>
+        <div class="right-controls">
+          <input type="number" class="input-reps" value="${set.targetReps}" min="0" max="99" data-target="${set.targetReps}">
+          <span style="margin-left: 3px; font-size: 0.75rem;">회</span>
+          <input type="checkbox" data-weight="${set.weight}" data-warmup="${set.isWarmup}">
+        </div>
+      `;
+      
+      const cb = row.querySelector('input[type="checkbox"]');
+      const numInput = row.querySelector('.input-reps');
+      
+      cb.addEventListener('change', (e) => {
+        unlockAudio();
+        calc();
+        if (e.target.checked) startTimer(FIXED_REST);
+      });
+      numInput.addEventListener('input', () => {
+        calc();
+      });
+      
+      card.appendChild(row);
+    });
+    container.appendChild(card);
+  });
+}
+
+function calc() {
+  let vol = 0;
+  let allMainChecked = true;
+  let allTargetsMet = true;
+  const rows = document.querySelectorAll('.set-row');
+  
+  rows.forEach(row => {
+    const cb = row.querySelector('input[type="checkbox"]');
+    const input = row.querySelector('.input-reps');
+    const weight = parseFloat(cb.dataset.weight);
+    const actualReps = parseInt(input.value) || 0;
+    const targetReps = parseInt(input.dataset.target);
+    const isWarmup = cb.dataset.warmup === "true";
+    
+    if (cb.checked) {
+      vol += weight * actualReps;
+      if (!isWarmup && actualReps < targetReps) {
+        allTargetsMet = false;
+      }
+    } else if (!isWarmup) {
+      allMainChecked = false;
+    }
+  });
+  
+  document.getElementById("total-volume").textContent = vol.toLocaleString();
+  const status = document.getElementById("status-msg");
+  
+  if (allMainChecked && rows.length > 0) {
+    if (allTargetsMet) {
+      if (currentTab === 'push') { weights.push.benchTop += 2.5; weights.push.ohpTop += 2.5; }
+      else if (currentTab === 'pull') { weights.pull.deadTop += 2.5; weights.pull.rowMain += 2.5; }
+      else if (currentTab === 'legs') { weights.legs.squatTop += 2.5; weights.legs.rdlMain += 2.5; }
+      else if (currentTab === 'arms') { weights.arms.curlMain += 2.5; }
+      saveWeights(weights);
+      status.className = "log-msg success";
+      status.innerHTML = `전 세트 목표 완수! ${currentTab.toUpperCase()} 메인 종목 +2.5kg 증량 반영됨`;
+    } else {
+      status.className = "log-msg failed";
+      status.innerHTML = `목표 미달 세트 존재: 다음 ${currentTab.toUpperCase()} 사이클 중량 유지`;
+    }
+  } else {
+    status.className = "log-msg";
+    let curText = "";
+    if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP 탑: ${weights.push.ohpTop}kg`;
+    if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg`;
+    if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / RDL: ${weights.legs.rdlMain}kg`;
+    if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 라트익: ${weights.arms.skullMain}kg`;
+    status.textContent = `현재 설정: ${curText}`;
+  }
+}
+
+function copyResults() {
+  const cards = document.querySelectorAll('.card');
+  const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+  const rpeVal = document.getElementById("session-rpe").value;
+  const sleepVal = document.getElementById("session-sleep").value;
+  
+  let resultText = `[오늘의 ${currentTab.toUpperCase()} 세션 정밀 데이터]\n`;
+  resultText += `- 총 소요 시간: ${elapsedMinutes}분 (${Math.floor(elapsedSeconds/60)}분 ${elapsedSeconds%60}초)\n`;
+  resultText += `- 직전 수면 시간: ${sleepVal}\n`;
+  resultText += `- 세션 RPE (체감 피로도): ${rpeVal} / 10\n\n`;
+  
+  let partVolume = {};
+  let totalVol = 0;
+  let completedSetsCount = 0;
+  
+  cards.forEach(card => {
+    const exName = card.dataset.exName;
+    const part = card.dataset.part;
+    const rows = card.querySelectorAll('.set-row');
+    let exLogs = [];
+    
+    if (!partVolume[part]) partVolume[part] = 0;
+    
+    rows.forEach(row => {
+      const cb = row.querySelector('input[type="checkbox"]');
+      const input = row.querySelector('.input-reps');
+      if (cb.checked) {
+        completedSetsCount++;
+        const weight = parseFloat(cb.dataset.weight);
+        const reps = parseInt(input.value) || 0;
+        const setVol = weight * reps;
+        totalVol += setVol;
+        partVolume[part] += setVol;
+        exLogs.push(` - ${row.dataset.setType}: ${weight}kg × ${reps}회`);
+      }
+    });
+    
+    if (exLogs.length > 0) {
+      resultText += `${exName}\n` + exLogs.join('\n') + '\n\n';
+    }
+  });
+  
+  if (completedSetsCount === 0) {
+    alert("완료된 세트가 없어! 세트를 먼저 체크해 줘.");
+    return;
+  }
+  
+  const density = (totalVol / elapsedMinutes).toFixed(1);
+  
+  resultText += `[데이터 분석 집계]\n`;
+  for (const [p, v] of Object.entries(partVolume)) {
+    resultText += `- ${p} 작업 볼륨: ${v.toLocaleString()} kg\n`;
+  }
+  resultText += `- 총 작업 볼륨: ${totalVol.toLocaleString()} kg\n`;
+  resultText += `- 훈련 밀도: ${density} kg/분\n`;
+  resultText += `- 상태: ${document.getElementById("status-msg").innerText.replace(/\n/g, ' ')}\n`;
+  
+  const textArea = document.getElementById("manual-copy-area");
+  textArea.value = resultText;
+  textArea.style.display = "block";
+  textArea.focus();
+  textArea.select();
+  textArea.setSelectionRange(0, 99999);
+  
+  let copySuccess = false;
+  try {
+    copySuccess = document.execCommand('copy');
+  } catch (err) {
+    copySuccess = false;
+  }
+  
+  if (copySuccess) {
+    alert("결과값이 클립보드에 복사되었어! 바로 대화창에 붙여넣어 줘.");
+  } else {
+    alert("하단 박스에 결과값이 자동 선택되었어! 박스를 길게 눌러 [복사]해 줘.");
+  }
+}
+
+function resetData() {
+  if (confirm(`현재 ${currentTab.toUpperCase()} 세션 중량을 초기화할까?`)) {
+    weights[currentTab] = { ...defaultWeights[currentTab] };
+    saveWeights(weights);
+    render();
+    calc();
+  }
+}
+
+window.addEventListener('touchstart', unlockAudio, { once: true });
+window.addEventListener('click', unlockAudio, { once: true });
+
+render();
+calc();
+</script>
+</body>
+</html>

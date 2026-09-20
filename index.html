@@ -6,7 +6,10 @@
 <title>PPL</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #fff; margin: 0; padding: 12px; }
-  h1 { font-size: 1.2rem; text-align: center; color: #4dabf7; margin: 4px 0 10px 0; font-weight: 800; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  h1 { font-size: 1.2rem; color: #4dabf7; margin: 0; font-weight: 800; }
+  .btn-config { background: #343a40; color: #adb5bd; border: 1px solid #495057; border-radius: 6px; padding: 5px 9px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+  
   .tab-group { display: flex; gap: 6px; margin-bottom: 10px; }
   .tab-btn { flex: 1; padding: 10px; background: #2a2a2a; color: #aaa; border: 1px solid #444; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
   .tab-btn.active { background: #1971c2; color: #fff; border-color: #339af0; }
@@ -39,11 +42,26 @@
   .failed { color: #ff922b; }
   
   #manual-copy-area { width: 100%; height: 140px; background: #111; color: #74c0fc; border: 1px solid #339af0; border-radius: 6px; margin-top: 12px; padding: 8px; font-size: 0.75rem; box-sizing: border-box; display: none; }
+  
+  /* 인앱 설정 모달창 */
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; padding: 14px; box-sizing: border-box; }
+  .modal-content { background: #1e1e1e; border: 1px solid #4dabf7; border-radius: 8px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; padding: 16px; box-sizing: border-box; }
+  .modal-title { font-size: 1rem; color: #4dabf7; font-weight: bold; margin-bottom: 12px; }
+  .config-group { margin-bottom: 12px; background: #252525; padding: 10px; border-radius: 6px; }
+  .config-group label { display: block; font-size: 0.8rem; color: #adb5bd; margin-bottom: 4px; }
+  .config-group input { width: 100%; background: #181818; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; box-sizing: border-box; font-size: 0.85rem; }
+  .modal-btn-row { display: flex; gap: 8px; margin-top: 14px; }
+  .modal-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+  .btn-save-cfg { background: #1971c2; color: #fff; }
+  .btn-close-cfg { background: #495057; color: #fff; }
 </style>
 </head>
 <body>
 
-<h1>PPL</h1>
+<div class="header-row">
+  <h1>PPL</h1>
+  <button class="btn-config" onclick="openConfigModal()">⚙️ 루틴/중량 설정</button>
+</div>
 
 <div class="tab-group">
   <button class="tab-btn active" onclick="switchTab('push')">Push</button>
@@ -97,7 +115,56 @@
     <button class="btn-copy" onclick="copyResults()">정밀 분석 데이터 복사</button>
     <button class="btn-reset" onclick="resetData()">중량 초기화</button>
   </div>
-  <textarea id="manual-copy-area" readonly placeholder="결과 데이터가 여기에 노출돼. 버튼 클릭 시 자동 복사가 안 되면 여기를 길게 눌러 복사해 줘."></textarea>
+  <textarea id="manual-copy-area" readonly placeholder="결과 데이터가 여기에 자동 표시돼. 복사 버튼이 안 될 경우 여기를 길게 눌러 복사해 줘."></textarea>
+</div>
+
+<!-- 인앱 설정 모달 -->
+<div id="config-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-title">⚙️ 세션 기준 중량 직접 수정</div>
+    
+    <div class="config-group">
+      <label>Push - 벤치프레스 탑세트 (kg)</label>
+      <input type="number" step="0.5" id="cfg-bench-top">
+    </div>
+    <div class="config-group">
+      <label>Push - 바벨 OHP 탑세트 (kg)</label>
+      <input type="number" step="0.5" id="cfg-ohp-top">
+    </div>
+    <div class="config-group">
+      <label>Pull - 컨벤 데드리프트 탑세트 (kg)</label>
+      <input type="number" step="0.5" id="cfg-dead-top">
+    </div>
+    <div class="config-group">
+      <label>Pull - 벤트오버 로우 메인 (kg)</label>
+      <input type="number" step="0.5" id="cfg-row-main">
+    </div>
+    <div class="config-group">
+      <label>Legs - 백스쿼트 탑세트 (kg)</label>
+      <input type="number" step="0.5" id="cfg-squat-top">
+    </div>
+    <div class="config-group">
+      <label>Legs - 루마니안 데드리프트 (RDL) 메인 (kg)</label>
+      <input type="number" step="0.5" id="cfg-rdl-main">
+    </div>
+    <div class="config-group">
+      <label>Arms - 바벨 컬 메인 (kg)</label>
+      <input type="number" step="0.5" id="cfg-curl-main">
+    </div>
+    <div class="config-group">
+      <label>Arms - 덤벨 라트익 합산 중량 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-skull-main">
+    </div>
+    <div class="config-group">
+      <label>Arms - 해머컬+킥백 슈퍼세트 합산 (kg)</label>
+      <input type="number" step="0.5" id="cfg-arm-super">
+    </div>
+    
+    <div class="modal-btn-row">
+      <button class="modal-btn btn-save-cfg" onclick="saveConfigModal()">저장 후 즉시 반영</button>
+      <button class="modal-btn btn-close-cfg" onclick="closeConfigModal()">닫기</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -112,20 +179,28 @@ setInterval(() => {
   document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
 }, 1000);
 
+// 직전 실전 수행 내역 완벽 동기화 (데드 137.5, 바벨컬 32.5, 킥백 10kg 반영 슈퍼세트 40kg)
 const defaultWeights = {
   push: { benchTop: 85, ohpTop: 45 },
   pull: { deadTop: 137.5, rowMain: 60 },
   legs: { squatTop: 92.5, rdlMain: 80 },
-  arms: { curlMain: 30, skullMain: 20 }
+  arms: { curlMain: 32.5, skullMain: 20, superSet: 40 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v15');
-  return saved ? JSON.parse(saved) : defaultWeights;
+  const saved = localStorage.getItem('ppl_arms_weights_v16');
+  if (!saved) return defaultWeights;
+  try {
+    const parsed = JSON.parse(saved);
+    if (!parsed.arms.superSet) parsed.arms.superSet = 40;
+    return parsed;
+  } catch(e) {
+    return defaultWeights;
+  }
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v15', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v16', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -219,9 +294,9 @@ function getRoutines() {
         name: "4. 바벨 바이셉스 컬",
         part: "이두",
         sets: [
-          { type: "본세트 1", weight: 30, targetReps: 12, isWarmup: false },
-          { type: "본세트 2", weight: 30, targetReps: 10, isWarmup: false },
-          { type: "본세트 3", weight: 30, targetReps: 10, isWarmup: false }
+          { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 12, isWarmup: false },
+          { type: "본세트 2", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false }
         ]
       }
     ],
@@ -287,12 +362,12 @@ function getRoutines() {
         ]
       },
       {
-        name: "3. [슈퍼세트] 덤벨 해머 컬(각 10kg) + 덤벨 킥백(각 7kg)",
+        name: `3. [슈퍼세트] 덤벨 해머 컬 + 덤벨 킥백`,
         part: "상완근/삼두",
         sets: [
-          { type: "슈퍼세트 1", weight: 34, targetReps: 12, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" },
-          { type: "슈퍼세트 2", weight: 34, targetReps: 12, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" },
-          { type: "슈퍼세트 3", weight: 34, targetReps: 10, isWarmup: false, desc: "해머컬 20kg + 킥백 14kg" }
+          { type: "슈퍼세트 1", weight: weights.arms.superSet, targetReps: 12, isWarmup: false, desc: `해머컬 ${weights.arms.superSet/2}kg + 킥백 ${weights.arms.superSet/2}kg` },
+          { type: "슈퍼세트 2", weight: weights.arms.superSet, targetReps: 12, isWarmup: false, desc: `해머컬 ${weights.arms.superSet/2}kg + 킥백 ${weights.arms.superSet/2}kg` },
+          { type: "슈퍼세트 3", weight: weights.arms.superSet, targetReps: 10, isWarmup: false, desc: `해머컬 ${weights.arms.superSet/2}kg + 킥백 ${weights.arms.superSet/2}kg` }
         ]
       }
     ]
@@ -447,12 +522,12 @@ function calc() {
   if (allMainChecked && rows.length > 0) {
     if (allTargetsMet) {
       if (currentTab === 'push') { weights.push.benchTop += 2.5; weights.push.ohpTop += 2.5; }
-      else if (currentTab === 'pull') { weights.pull.deadTop += 2.5; weights.pull.rowMain += 2.5; }
-      else if (currentTab === 'legs') { weights.legs.squatTop += 2.5; weights.legs.rdlMain += 2.5; }
+      else if (currentTab === 'pull') { weights.pull.deadTop += 2.5; }
+      else if (currentTab === 'legs') { weights.legs.squatTop += 2.5; }
       else if (currentTab === 'arms') { weights.arms.curlMain += 2.5; }
       saveWeights(weights);
       status.className = "log-msg success";
-      status.innerHTML = `전 세트 목표 완수! ${currentTab.toUpperCase()} 메인 종목 +2.5kg 증량 반영됨`;
+      status.innerHTML = `전 세트 목표 완수! ${currentTab.toUpperCase()} 메인 종목 +2.5kg 자동 증량 반영됨`;
     } else {
       status.className = "log-msg failed";
       status.innerHTML = `목표 미달 세트 존재: 다음 ${currentTab.toUpperCase()} 사이클 중량 유지`;
@@ -463,7 +538,7 @@ function calc() {
     if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP 탑: ${weights.push.ohpTop}kg`;
     if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg`;
     if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / RDL: ${weights.legs.rdlMain}kg`;
-    if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 라트익: ${weights.arms.skullMain}kg`;
+    if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 슈퍼세트: ${weights.arms.superSet}kg`;
     status.textContent = `현재 설정: ${curText}`;
   }
 }
@@ -553,6 +628,42 @@ function resetData() {
     render();
     calc();
   }
+}
+
+// 인앱 설정 모달 제어 함수
+function openConfigModal() {
+  document.getElementById("cfg-bench-top").value = weights.push.benchTop;
+  document.getElementById("cfg-ohp-top").value = weights.push.ohpTop;
+  document.getElementById("cfg-dead-top").value = weights.pull.deadTop;
+  document.getElementById("cfg-row-main").value = weights.pull.rowMain;
+  document.getElementById("cfg-squat-top").value = weights.legs.squatTop;
+  document.getElementById("cfg-rdl-main").value = weights.legs.rdlMain;
+  document.getElementById("cfg-curl-main").value = weights.arms.curlMain;
+  document.getElementById("cfg-skull-main").value = weights.arms.skullMain;
+  document.getElementById("cfg-arm-super").value = weights.arms.superSet;
+  document.getElementById("config-modal").style.display = "flex";
+}
+
+function closeConfigModal() {
+  document.getElementById("config-modal").style.display = "none";
+}
+
+function saveConfigModal() {
+  weights.push.benchTop = parseFloat(document.getElementById("cfg-bench-top").value) || weights.push.benchTop;
+  weights.push.ohpTop = parseFloat(document.getElementById("cfg-ohp-top").value) || weights.push.ohpTop;
+  weights.pull.deadTop = parseFloat(document.getElementById("cfg-dead-top").value) || weights.pull.deadTop;
+  weights.pull.rowMain = parseFloat(document.getElementById("cfg-row-main").value) || weights.pull.rowMain;
+  weights.legs.squatTop = parseFloat(document.getElementById("cfg-squat-top").value) || weights.legs.squatTop;
+  weights.legs.rdlMain = parseFloat(document.getElementById("cfg-rdl-main").value) || weights.legs.rdlMain;
+  weights.arms.curlMain = parseFloat(document.getElementById("cfg-curl-main").value) || weights.arms.curlMain;
+  weights.arms.skullMain = parseFloat(document.getElementById("cfg-skull-main").value) || weights.arms.skullMain;
+  weights.arms.superSet = parseFloat(document.getElementById("cfg-arm-super").value) || weights.arms.superSet;
+  
+  saveWeights(weights);
+  closeConfigModal();
+  render();
+  calc();
+  alert("설정이 앱에 즉시 영구 저장되었어!");
 }
 
 window.addEventListener('touchstart', unlockAudio, { once: true });

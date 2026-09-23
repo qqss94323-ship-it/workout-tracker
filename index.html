@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PPL</title>
+<title>PPL 고중량 분석기</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #fff; margin: 0; padding: 12px; }
   .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -59,7 +59,7 @@
 <body>
 
 <div class="header-row">
-  <h1>PPL</h1>
+  <h1>PPL 고중량 분석기</h1>
   <button class="btn-config" onclick="openConfigModal()">⚙️ 루틴/중량 설정</button>
 </div>
 
@@ -140,6 +140,10 @@
       <input type="number" step="0.5" id="cfg-row-main">
     </div>
     <div class="config-group">
+      <label>Pull - 체스트 서포티드 DB 로우 합산 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-cs-row">
+    </div>
+    <div class="config-group">
       <label>Legs - 백스쿼트 탑세트 (kg)</label>
       <input type="number" step="0.5" id="cfg-squat-top">
     </div>
@@ -179,20 +183,20 @@ setInterval(() => {
   document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
 }, 1000);
 
-// 직전 실전 수행 내역 완벽 동기화 (데드 137.5, 바벨컬 32.5, 킥백 10kg 반영 슈퍼세트 40kg)
+// 직전 실전 수행 내역 완벽 동기화 (데드 137.5, 체스트 서포티드 48kg, 바벨컬 32.5)
 const defaultWeights = {
-  push: { benchTop: 85, ohpTop: 45 },
-  pull: { deadTop: 137.5, rowMain: 60 },
-  legs: { squatTop: 92.5, rdlMain: 80 },
+  push: { benchTop: 92.5, ohpTop: 50 },
+  pull: { deadTop: 137.5, rowMain: 60, csRow: 48 },
+  legs: { squatTop: 95, rdlMain: 80 },
   arms: { curlMain: 32.5, skullMain: 20, superSet: 40 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v16');
+  const saved = localStorage.getItem('ppl_arms_weights_v17');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.arms.superSet) parsed.arms.superSet = 40;
+    if (!parsed.pull.csRow) parsed.pull.csRow = 48;
     return parsed;
   } catch(e) {
     return defaultWeights;
@@ -200,7 +204,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v16', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v17', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -268,8 +272,8 @@ function getRoutines() {
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
           { type: "웜업 3", weight: 120, targetReps: 1, isWarmup: true },
           { type: "Top Set", weight: weights.pull.deadTop, targetReps: 3, isWarmup: false },
-          { type: "Back-off 1", weight: weights.pull.deadTop - 15, targetReps: 5, isWarmup: false },
-          { type: "Back-off 2", weight: weights.pull.deadTop - 15, targetReps: 5, isWarmup: false }
+          { type: "Back-off 1", weight: weights.pull.deadTop - 15, targetReps: 6, isWarmup: false },
+          { type: "Back-off 2", weight: weights.pull.deadTop - 15, targetReps: 6, isWarmup: false }
         ]
       },
       {
@@ -282,12 +286,12 @@ function getRoutines() {
         ]
       },
       {
-        name: "3. 원암 덤벨 로우 (각 24kg)",
-        part: "등",
+        name: "3. 체스트 서포티드 DB 로우 (양손 동시)",
+        part: "등(상부/요추0%)",
         sets: [
-          { type: "본세트 1", weight: 24, targetReps: 10, isWarmup: false },
-          { type: "본세트 2", weight: 24, targetReps: 10, isWarmup: false },
-          { type: "본세트 3", weight: 24, targetReps: 10, isWarmup: false }
+          { type: "본세트 1", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
+          { type: "본세트 2", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
+          { type: "본세트 3", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` }
         ]
       },
       {
@@ -536,7 +540,7 @@ function calc() {
     status.className = "log-msg";
     let curText = "";
     if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP 탑: ${weights.push.ohpTop}kg`;
-    if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg`;
+    if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / CS로우: ${weights.pull.csRow}kg`;
     if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / RDL: ${weights.legs.rdlMain}kg`;
     if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 슈퍼세트: ${weights.arms.superSet}kg`;
     status.textContent = `현재 설정: ${curText}`;
@@ -636,6 +640,7 @@ function openConfigModal() {
   document.getElementById("cfg-ohp-top").value = weights.push.ohpTop;
   document.getElementById("cfg-dead-top").value = weights.pull.deadTop;
   document.getElementById("cfg-row-main").value = weights.pull.rowMain;
+  document.getElementById("cfg-cs-row").value = weights.pull.csRow;
   document.getElementById("cfg-squat-top").value = weights.legs.squatTop;
   document.getElementById("cfg-rdl-main").value = weights.legs.rdlMain;
   document.getElementById("cfg-curl-main").value = weights.arms.curlMain;
@@ -653,6 +658,7 @@ function saveConfigModal() {
   weights.push.ohpTop = parseFloat(document.getElementById("cfg-ohp-top").value) || weights.push.ohpTop;
   weights.pull.deadTop = parseFloat(document.getElementById("cfg-dead-top").value) || weights.pull.deadTop;
   weights.pull.rowMain = parseFloat(document.getElementById("cfg-row-main").value) || weights.pull.rowMain;
+  weights.pull.csRow = parseFloat(document.getElementById("cfg-cs-row").value) || weights.pull.csRow;
   weights.legs.squatTop = parseFloat(document.getElementById("cfg-squat-top").value) || weights.legs.squatTop;
   weights.legs.rdlMain = parseFloat(document.getElementById("cfg-rdl-main").value) || weights.legs.rdlMain;
   weights.arms.curlMain = parseFloat(document.getElementById("cfg-curl-main").value) || weights.arms.curlMain;

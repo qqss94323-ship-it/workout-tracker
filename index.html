@@ -64,9 +64,9 @@
 </div>
 
 <div class="tab-group">
-  <button class="tab-btn active" onclick="switchTab('push')">Push</button>
+  <button class="tab-btn" onclick="switchTab('push')">Push</button>
   <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
-  <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
+  <button class="tab-btn active" onclick="switchTab('legs')">Legs</button>
   <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
 </div>
 
@@ -148,8 +148,16 @@
       <input type="number" step="0.5" id="cfg-squat-top">
     </div>
     <div class="config-group">
-      <label>Legs - 루마니안 데드리프트 (RDL) 메인 (kg)</label>
-      <input type="number" step="0.5" id="cfg-rdl-main">
+      <label>Legs - 서포티드 불스스 덤벨 중량 (kg, 한 손 지지)</label>
+      <input type="number" step="0.5" id="cfg-bulg-weight">
+    </div>
+    <div class="config-group">
+      <label>Legs - 라잉 덤벨 레그 컬 (kg, 양발 파지)</label>
+      <input type="number" step="0.5" id="cfg-legcurl-weight">
+    </div>
+    <div class="config-group">
+      <label>Legs - 서포티드 카프 레이즈 덤벨 (kg, 랙 지지)</label>
+      <input type="number" step="0.5" id="cfg-calf-weight">
     </div>
     <div class="config-group">
       <label>Arms - 바벨 컬 메인 (kg)</label>
@@ -173,9 +181,8 @@
 
 <script>
 const FIXED_REST = 90;
-let currentTab = 'push';
+let currentTab = 'legs';
 
-// [핵심 개선] 백그라운드 스로틀링 극복을 위한 절대 시각 타임스탬프 로직
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
 
@@ -187,20 +194,22 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 오늘 실전 수행 결과 완벽 반영 (데드 142.5kg 증량, CS로우 40kg 동기화, 바벨컬 32.5kg 유지)
+// 하체 루틴 업데이트: RDL 제거 -> 덤벨 레그컬 신설, 불스스/카프레이즈 한 손 지지화
 const defaultWeights = {
   push: { benchTop: 92.5, ohpTop: 50 },
   pull: { deadTop: 142.5, rowMain: 60, csRow: 40 },
-  legs: { squatTop: 95, rdlMain: 80 },
+  legs: { squatTop: 100, bulgWeight: 24, legCurlWeight: 12, calfWeight: 20 },
   arms: { curlMain: 32.5, skullMain: 20, superSet: 40 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v19');
+  const saved = localStorage.getItem('ppl_arms_weights_v20');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.pull.csRow) parsed.pull.csRow = 40;
+    if (!parsed.legs.legCurlWeight) parsed.legs.legCurlWeight = 12;
+    if (!parsed.legs.bulgWeight) parsed.legs.bulgWeight = 24;
+    if (!parsed.legs.calfWeight) parsed.legs.calfWeight = 20;
     return parsed;
   } catch(e) {
     return defaultWeights;
@@ -208,7 +217,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v19', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v20', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -321,45 +330,45 @@ function getRoutines() {
       {
         id: "squat",
         name: "1. 백 스쿼트 (웜업 + 탑세트)",
-        part: "하체(대퇴/둔근)",
+        part: "하체(대퇴사두/둔근)",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 3", weight: 80, targetReps: 2, isWarmup: true },
           { type: "Top Set", weight: weights.legs.squatTop, targetReps: 3, isWarmup: false },
-          { type: "Back-off 1", weight: weights.legs.squatTop - 10, targetReps: 6, isWarmup: false },
-          { type: "Back-off 2", weight: weights.legs.squatTop - 10, targetReps: 6, isWarmup: false },
-          { type: "Back-off 3", weight: weights.legs.squatTop - 20, targetReps: 8, isWarmup: false }
-        ]
-      },
-      {
-        id: "rdl",
-        name: "2. 바벨 루마니안 데드리프트 (RDL)",
-        part: "하체(햄스트링/둔근)",
-        sets: [
-          { type: "본세트 1", weight: weights.legs.rdlMain, targetReps: 10, isWarmup: false },
-          { type: "본세트 2", weight: weights.legs.rdlMain, targetReps: 8, isWarmup: false },
-          { type: "본세트 3", weight: weights.legs.rdlMain, targetReps: 8, isWarmup: false }
+          { type: "Back-off 1", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
+          { type: "Back-off 2", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
+          { type: "Back-off 3", weight: weights.legs.squatTop - 25, targetReps: 8, isWarmup: false }
         ]
       },
       {
         id: "bulgarian",
-        name: "3. 불가리안 스플릿 스쿼트 (각 12kg)",
-        part: "하체(편측)",
+        name: "2. 서포티드 불스스 (한 손 랙 지지 + 단일 덤벨)",
+        part: "하체(대퇴사두/편측)",
         sets: [
-          { type: "본세트 1", weight: 24, targetReps: 10, isWarmup: false },
-          { type: "본세트 2", weight: 24, targetReps: 10, isWarmup: false },
-          { type: "본세트 3", weight: 24, targetReps: 8, isWarmup: false }
+          { type: "본세트 1", weight: weights.legs.bulgWeight, targetReps: 10, isWarmup: false, desc: `단일 덤벨 ${weights.legs.bulgWeight}kg` },
+          { type: "본세트 2", weight: weights.legs.bulgWeight, targetReps: 10, isWarmup: false, desc: `단일 덤벨 ${weights.legs.bulgWeight}kg` },
+          { type: "본세트 3", weight: weights.legs.bulgWeight, targetReps: 8, isWarmup: false, desc: `단일 덤벨 ${weights.legs.bulgWeight}kg` }
+        ]
+      },
+      {
+        id: "leg_curl",
+        name: "3. 라잉 덤벨 레그 컬 (벤치 엎드림/요추0%)",
+        part: "하체(햄스트링 고립)",
+        sets: [
+          { type: "본세트 1", weight: weights.legs.legCurlWeight, targetReps: 12, isWarmup: false, desc: `발 사이 파지 ${weights.legs.legCurlWeight}kg` },
+          { type: "본세트 2", weight: weights.legs.legCurlWeight, targetReps: 12, isWarmup: false, desc: `발 사이 파지 ${weights.legs.legCurlWeight}kg` },
+          { type: "본세트 3", weight: weights.legs.legCurlWeight, targetReps: 10, isWarmup: false, desc: `발 사이 파지 ${weights.legs.legCurlWeight}kg` }
         ]
       },
       {
         id: "calf",
-        name: "4. 바벨 카프 레이즈",
+        name: "4. 서포티드 덤벨 카프 레이즈 (랙 지지)",
         part: "종아리",
         sets: [
-          { type: "본세트 1", weight: 60, targetReps: 15, isWarmup: false },
-          { type: "본세트 2", weight: 60, targetReps: 15, isWarmup: false },
-          { type: "본세트 3", weight: 60, targetReps: 15, isWarmup: false }
+          { type: "본세트 1", weight: weights.legs.calfWeight, targetReps: 15, isWarmup: false, desc: `단일 덤벨 ${weights.legs.calfWeight}kg` },
+          { type: "본세트 2", weight: weights.legs.calfWeight, targetReps: 15, isWarmup: false, desc: `단일 덤벨 ${weights.legs.calfWeight}kg` },
+          { type: "본세트 3", weight: weights.legs.calfWeight, targetReps: 15, isWarmup: false, desc: `단일 덤벨 ${weights.legs.calfWeight}kg` }
         ]
       }
     ],
@@ -461,7 +470,6 @@ function startTimer(seconds) {
   timerInterval = setInterval(updateRestTimer, 1000);
 }
 
-// [핵심 개선] 화면을 다시 켜거나 크롬으로 돌아왔을 때 즉시 화면 갱신
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
     updateElapsed();
@@ -471,7 +479,7 @@ document.addEventListener("visibilitychange", () => {
 
 function switchTab(tab) {
   currentTab = tab;
-  sessionStartTime = Date.now(); // 탭 전환 시 세션 시작 시간 리셋
+  sessionStartTime = Date.now();
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.textContent.toLowerCase() === tab);
   });
@@ -591,7 +599,10 @@ function calc() {
         weights.legs.squatTop += 2.5;
         changed = true;
         messages.push("스쿼트 탑세트 +2.5kg 증량");
+      } else if (res.exId === 'squat' && !res.success) {
+        messages.push("스쿼트 중량 유지");
       }
+
       if ((res.exId === 'pull_curl' || res.exId === 'arm_curl') && !res.success) {
         messages.push("바벨컬 중량 동결/유지 (치팅 통제)");
       }
@@ -610,7 +621,7 @@ function calc() {
     let curText = "";
     if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP: ${weights.push.ohpTop}kg`;
     if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / CS로우: ${weights.pull.csRow}kg`;
-    if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / RDL: ${weights.legs.rdlMain}kg`;
+    if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / 레그컬: ${weights.legs.legCurlWeight}kg / 불스스: ${weights.legs.bulgWeight}kg`;
     if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 슈퍼세트: ${weights.arms.superSet}kg`;
     status.textContent = `현재 설정: ${curText}`;
   }
@@ -710,7 +721,9 @@ function openConfigModal() {
   document.getElementById("cfg-row-main").value = weights.pull.rowMain;
   document.getElementById("cfg-cs-row").value = weights.pull.csRow;
   document.getElementById("cfg-squat-top").value = weights.legs.squatTop;
-  document.getElementById("cfg-rdl-main").value = weights.legs.rdlMain;
+  document.getElementById("cfg-bulg-weight").value = weights.legs.bulgWeight;
+  document.getElementById("cfg-legcurl-weight").value = weights.legs.legCurlWeight;
+  document.getElementById("cfg-calf-weight").value = weights.legs.calfWeight;
   document.getElementById("cfg-curl-main").value = weights.arms.curlMain;
   document.getElementById("cfg-skull-main").value = weights.arms.skullMain;
   document.getElementById("cfg-arm-super").value = weights.arms.superSet;
@@ -728,7 +741,9 @@ function saveConfigModal() {
   weights.pull.rowMain = parseFloat(document.getElementById("cfg-row-main").value) || weights.pull.rowMain;
   weights.pull.csRow = parseFloat(document.getElementById("cfg-cs-row").value) || weights.pull.csRow;
   weights.legs.squatTop = parseFloat(document.getElementById("cfg-squat-top").value) || weights.legs.squatTop;
-  weights.legs.rdlMain = parseFloat(document.getElementById("cfg-rdl-main").value) || weights.legs.rdlMain;
+  weights.legs.bulgWeight = parseFloat(document.getElementById("cfg-bulg-weight").value) || weights.legs.bulgWeight;
+  weights.legs.legCurlWeight = parseFloat(document.getElementById("cfg-legcurl-weight").value) || weights.legs.legCurlWeight;
+  weights.legs.calfWeight = parseFloat(document.getElementById("cfg-calf-weight").value) || weights.legs.calfWeight;
   weights.arms.curlMain = parseFloat(document.getElementById("cfg-curl-main").value) || weights.arms.curlMain;
   weights.arms.skullMain = parseFloat(document.getElementById("cfg-skull-main").value) || weights.arms.skullMain;
   weights.arms.superSet = parseFloat(document.getElementById("cfg-arm-super").value) || weights.arms.superSet;

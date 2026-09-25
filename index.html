@@ -175,28 +175,32 @@
 const FIXED_REST = 90;
 let currentTab = 'push';
 
-let elapsedSeconds = 0;
-setInterval(() => {
-  elapsedSeconds++;
-  const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-  const s = String(elapsedSeconds % 60).padStart(2, '0');
-  document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
-}, 1000);
+// [핵심 개선] 백그라운드 스로틀링 극복을 위한 절대 시각 타임스탬프 로직
+let sessionStartTime = Date.now();
+let totalElapsedSeconds = 0;
 
-// 직전 실전 수행 내역 완벽 동기화 (데드 137.5, 체스트 서포티드 48kg, 바벨컬 32.5)
+function updateElapsed() {
+  totalElapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+  const m = String(Math.floor(totalElapsedSeconds / 60)).padStart(2, '0');
+  const s = String(totalElapsedSeconds % 60).padStart(2, '0');
+  document.getElementById("elapsed-timer").textContent = `${m}:${s}`;
+}
+setInterval(updateElapsed, 1000);
+
+// 오늘 실전 수행 결과 완벽 반영 (데드 142.5kg 증량, CS로우 40kg 동기화, 바벨컬 32.5kg 유지)
 const defaultWeights = {
   push: { benchTop: 92.5, ohpTop: 50 },
-  pull: { deadTop: 137.5, rowMain: 60, csRow: 48 },
+  pull: { deadTop: 142.5, rowMain: 60, csRow: 40 },
   legs: { squatTop: 95, rdlMain: 80 },
   arms: { curlMain: 32.5, skullMain: 20, superSet: 40 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v17');
+  const saved = localStorage.getItem('ppl_arms_weights_v19');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.pull.csRow) parsed.pull.csRow = 48;
+    if (!parsed.pull.csRow) parsed.pull.csRow = 40;
     return parsed;
   } catch(e) {
     return defaultWeights;
@@ -204,7 +208,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v17', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v19', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -213,6 +217,7 @@ function getRoutines() {
   return {
     push: [
       {
+        id: "bench",
         name: "1. 바벨 벤치프레스 (웜업 + 탑세트)",
         part: "가슴",
         sets: [
@@ -226,6 +231,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "ohp",
         name: "2. 바벨 OHP (탑세트 + 백오프)",
         part: "어깨",
         sets: [
@@ -235,6 +241,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "inc_db",
         name: "3. 인클라인 덤벨 프레스 (각 24kg)",
         part: "가슴",
         sets: [
@@ -244,6 +251,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "side_rear",
         name: "4. [슈퍼세트] 덤벨 사레레(각 8kg) + 리어델트(각 8kg)",
         part: "어깨",
         sets: [
@@ -254,6 +262,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "skull",
         name: "5. 덤벨 라잉 트라이셉스 익스텐션 (라트익 각 10kg)",
         part: "삼두",
         sets: [
@@ -265,6 +274,7 @@ function getRoutines() {
     ],
     pull: [
       {
+        id: "dead",
         name: "1. 컨벤셔널 데드리프트 (웜업 + 탑세트)",
         part: "등/후면사슬",
         sets: [
@@ -277,28 +287,31 @@ function getRoutines() {
         ]
       },
       {
+        id: "row",
         name: "2. 바벨 벤트오버 로우",
         part: "등",
         sets: [
           { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 10, isWarmup: false },
-          { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
-          { type: "본세트 3", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false }
+          { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false },
+          { type: "본세트 3", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false }
         ]
       },
       {
-        name: "3. 체스트 서포티드 DB 로우 (양손 동시)",
+        id: "cs_row",
+        name: "3. 체스트 서포티드 DB 로우 (양손 각 20kg)",
         part: "등(상부/요추0%)",
         sets: [
-          { type: "본세트 1", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
-          { type: "본세트 2", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
-          { type: "본세트 3", weight: weights.pull.csRow, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` }
+          { type: "본세트 1", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
+          { type: "본세트 2", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
+          { type: "본세트 3", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` }
         ]
       },
       {
-        name: "4. 바벨 바이셉스 컬",
+        id: "pull_curl",
+        name: "4. 바벨 바이셉스 컬 (치팅 통제/네거티브 3초)",
         part: "이두",
         sets: [
-          { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 12, isWarmup: false },
+          { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
           { type: "본세트 2", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
           { type: "본세트 3", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false }
         ]
@@ -306,6 +319,7 @@ function getRoutines() {
     ],
     legs: [
       {
+        id: "squat",
         name: "1. 백 스쿼트 (웜업 + 탑세트)",
         part: "하체(대퇴/둔근)",
         sets: [
@@ -319,6 +333,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "rdl",
         name: "2. 바벨 루마니안 데드리프트 (RDL)",
         part: "하체(햄스트링/둔근)",
         sets: [
@@ -328,6 +343,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "bulgarian",
         name: "3. 불가리안 스플릿 스쿼트 (각 12kg)",
         part: "하체(편측)",
         sets: [
@@ -337,6 +353,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "calf",
         name: "4. 바벨 카프 레이즈",
         part: "종아리",
         sets: [
@@ -348,6 +365,7 @@ function getRoutines() {
     ],
     arms: [
       {
+        id: "arm_curl",
         name: "1. 바벨 바이셉스 컬 (이두 주동)",
         part: "이두",
         sets: [
@@ -357,6 +375,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "arm_skull",
         name: "2. 덤벨 라잉 트라이셉스 익스텐션 (각 10kg)",
         part: "삼두",
         sets: [
@@ -366,6 +385,7 @@ function getRoutines() {
         ]
       },
       {
+        id: "arm_super",
         name: `3. [슈퍼세트] 덤벨 해머 컬 + 덤벨 킥백`,
         part: "상완근/삼두",
         sets: [
@@ -379,6 +399,7 @@ function getRoutines() {
 }
 
 let timerInterval = null;
+let restTargetTime = null;
 let audioCtx = null;
 
 function unlockAudio() {
@@ -410,38 +431,47 @@ function triggerCleanAlarm() {
   }
 }
 
+function updateRestTimer() {
+  if (!restTargetTime) return;
+  const display = document.getElementById("rest-timer");
+  const remainingMs = restTargetTime - Date.now();
+  const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+  
+  const m = String(Math.floor(remainingSec / 60)).padStart(2, '0');
+  const s = String(remainingSec % 60).padStart(2, '0');
+  const timeStr = `${m}:${s}`;
+  
+  display.textContent = timeStr;
+  document.title = `[${timeStr}] PPL`;
+  
+  if (remainingSec <= 0) {
+    clearInterval(timerInterval);
+    restTargetTime = null;
+    display.textContent = "00:00 (종료)";
+    document.title = "⏰ [휴식 끝!] PPL";
+    triggerCleanAlarm();
+  }
+}
+
 function startTimer(seconds) {
   unlockAudio();
   clearInterval(timerInterval);
-  
-  const targetTime = Date.now() + seconds * 1000;
-  const display = document.getElementById("rest-timer");
-  
-  const tick = () => {
-    const remainingMs = targetTime - Date.now();
-    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
-    
-    const m = String(Math.floor(remainingSec / 60)).padStart(2, '0');
-    const s = String(remainingSec % 60).padStart(2, '0');
-    const timeStr = `${m}:${s}`;
-    
-    display.textContent = timeStr;
-    document.title = `[${timeStr}] PPL`;
-    
-    if (remainingSec <= 0) {
-      clearInterval(timerInterval);
-      display.textContent = "00:00 (종료)";
-      document.title = "⏰ [휴식 끝!] PPL";
-      triggerCleanAlarm();
-    }
-  };
-  
-  tick();
-  timerInterval = setInterval(tick, 1000);
+  restTargetTime = Date.now() + seconds * 1000;
+  updateRestTimer();
+  timerInterval = setInterval(updateRestTimer, 1000);
 }
+
+// [핵심 개선] 화면을 다시 켜거나 크롬으로 돌아왔을 때 즉시 화면 갱신
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    updateElapsed();
+    updateRestTimer();
+  }
+});
 
 function switchTab(tab) {
   currentTab = tab;
+  sessionStartTime = Date.now(); // 탭 전환 시 세션 시작 시간 리셋
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.textContent.toLowerCase() === tab);
   });
@@ -458,6 +488,7 @@ function render() {
   curRoutine.forEach(exercise => {
     const card = document.createElement("div");
     card.className = "card";
+    card.dataset.exId = exercise.id;
     card.dataset.exName = exercise.name;
     card.dataset.part = exercise.part;
     card.innerHTML = `<div class="card-title">${exercise.name} <span style="font-size:0.75rem; color:#aaa;">[${exercise.part}]</span></div>`;
@@ -498,48 +529,86 @@ function render() {
 
 function calc() {
   let vol = 0;
-  let allMainChecked = true;
-  let allTargetsMet = true;
-  const rows = document.querySelectorAll('.set-row');
-  
-  rows.forEach(row => {
-    const cb = row.querySelector('input[type="checkbox"]');
-    const input = row.querySelector('.input-reps');
-    const weight = parseFloat(cb.dataset.weight);
-    const actualReps = parseInt(input.value) || 0;
-    const targetReps = parseInt(input.dataset.target);
-    const isWarmup = cb.dataset.warmup === "true";
-    
-    if (cb.checked) {
-      vol += weight * actualReps;
-      if (!isWarmup && actualReps < targetReps) {
-        allTargetsMet = false;
+  const cards = document.querySelectorAll('.card');
+  let allCardsFullyChecked = true;
+  let exResults = [];
+
+  cards.forEach(card => {
+    const exId = card.dataset.exId;
+    const rows = card.querySelectorAll('.set-row');
+    let exAllChecked = true;
+    let exTargetsMet = true;
+
+    rows.forEach(row => {
+      const cb = row.querySelector('input[type="checkbox"]');
+      const input = row.querySelector('.input-reps');
+      const weight = parseFloat(cb.dataset.weight);
+      const actualReps = parseInt(input.value) || 0;
+      const targetReps = parseInt(input.dataset.target);
+      const isWarmup = cb.dataset.warmup === "true";
+
+      if (cb.checked) {
+        vol += weight * actualReps;
+        if (!isWarmup && actualReps < targetReps) {
+          exTargetsMet = false;
+        }
+      } else if (!isWarmup) {
+        exAllChecked = false;
+        allCardsFullyChecked = false;
       }
-    } else if (!isWarmup) {
-      allMainChecked = false;
-    }
+    });
+
+    exResults.push({ exId, completed: exAllChecked, success: exTargetsMet });
   });
-  
+
   document.getElementById("total-volume").textContent = vol.toLocaleString();
   const status = document.getElementById("status-msg");
-  
-  if (allMainChecked && rows.length > 0) {
-    if (allTargetsMet) {
-      if (currentTab === 'push') { weights.push.benchTop += 2.5; weights.push.ohpTop += 2.5; }
-      else if (currentTab === 'pull') { weights.pull.deadTop += 2.5; }
-      else if (currentTab === 'legs') { weights.legs.squatTop += 2.5; }
-      else if (currentTab === 'arms') { weights.arms.curlMain += 2.5; }
+
+  if (allCardsFullyChecked && cards.length > 0) {
+    let changed = false;
+    let messages = [];
+
+    exResults.forEach(res => {
+      if (res.exId === 'dead' && res.success) {
+        weights.pull.deadTop += 2.5;
+        changed = true;
+        messages.push("데드리프트 탑세트 +2.5kg 증량");
+      } else if (res.exId === 'dead' && !res.success) {
+        messages.push("데드리프트 중량 유지");
+      }
+
+      if (res.exId === 'bench' && res.success) {
+        weights.push.benchTop += 2.5;
+        changed = true;
+        messages.push("벤치프레스 탑세트 +2.5kg 증량");
+      }
+      if (res.exId === 'ohp' && res.success) {
+        weights.push.ohpTop += 2.5;
+        changed = true;
+        messages.push("OHP 탑세트 +2.5kg 증량");
+      }
+      if (res.exId === 'squat' && res.success) {
+        weights.legs.squatTop += 2.5;
+        changed = true;
+        messages.push("스쿼트 탑세트 +2.5kg 증량");
+      }
+      if ((res.exId === 'pull_curl' || res.exId === 'arm_curl') && !res.success) {
+        messages.push("바벨컬 중량 동결/유지 (치팅 통제)");
+      }
+    });
+
+    if (changed) {
       saveWeights(weights);
       status.className = "log-msg success";
-      status.innerHTML = `전 세트 목표 완수! ${currentTab.toUpperCase()} 메인 종목 +2.5kg 자동 증량 반영됨`;
+      status.innerHTML = `세션 완료: ${messages.join(' | ')}`;
     } else {
       status.className = "log-msg failed";
-      status.innerHTML = `목표 미달 세트 존재: 다음 ${currentTab.toUpperCase()} 사이클 중량 유지`;
+      status.innerHTML = `세션 완료 (미달 종목 유지): ${messages.join(' | ')}`;
     }
   } else {
     status.className = "log-msg";
     let curText = "";
-    if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP 탑: ${weights.push.ohpTop}kg`;
+    if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP: ${weights.push.ohpTop}kg`;
     if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / CS로우: ${weights.pull.csRow}kg`;
     if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / RDL: ${weights.legs.rdlMain}kg`;
     if (currentTab === 'arms') curText = `바벨컬 메인: ${weights.arms.curlMain}kg / 슈퍼세트: ${weights.arms.superSet}kg`;
@@ -549,12 +618,12 @@ function calc() {
 
 function copyResults() {
   const cards = document.querySelectorAll('.card');
-  const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+  const elapsedMinutes = Math.max(1, Math.round(totalElapsedSeconds / 60));
   const rpeVal = document.getElementById("session-rpe").value;
   const sleepVal = document.getElementById("session-sleep").value;
   
   let resultText = `[오늘의 ${currentTab.toUpperCase()} 세션 정밀 데이터]\n`;
-  resultText += `- 총 소요 시간: ${elapsedMinutes}분 (${Math.floor(elapsedSeconds/60)}분 ${elapsedSeconds%60}초)\n`;
+  resultText += `- 총 소요 시간: ${elapsedMinutes}분 (${Math.floor(totalElapsedSeconds/60)}분 ${totalElapsedSeconds%60}초)\n`;
   resultText += `- 직전 수면 시간: ${sleepVal}\n`;
   resultText += `- 세션 RPE (체감 피로도): ${rpeVal} / 10\n\n`;
   
@@ -634,7 +703,6 @@ function resetData() {
   }
 }
 
-// 인앱 설정 모달 제어 함수
 function openConfigModal() {
   document.getElementById("cfg-bench-top").value = weights.push.benchTop;
   document.getElementById("cfg-ohp-top").value = weights.push.ohpTop;

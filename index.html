@@ -59,7 +59,7 @@
 <body>
 
 <div class="header-row">
-  <h1>PPL 고중량 분석기</h1>
+  <h1>PPL 고중량 분석기 (스트렝스 420kg 복구)</h1>
   <button class="btn-config" onclick="openConfigModal()">⚙️ 루틴/중량 설정</button>
 </div>
 
@@ -86,12 +86,12 @@
     <label>세션 RPE (체감 피로도)</label>
     <select id="session-rpe">
       <option value="6">RPE 6 (여유 많음)</option>
-      <option value="7">RPE 7 (3회 더 가능)</option>
+      <option value="7">RPE 7 (3회 더 가능 - 과부하 적응)</option>
       <option value="8" selected>RPE 8 (2회 더 가능 - 적정)</option>
       <option value="8.5">RPE 8.5 (1~2회 가능)</option>
       <option value="9">RPE 9 (1회 더 가능)</option>
       <option value="9.5">RPE 9.5 (한계 근접)</option>
-      <option value="10">RPE 10 (완전 탈진)</option>
+      <option value="10">RPE 10 (완전 탈진/치팅)</option>
     </select>
   </div>
   <div class="meta-field">
@@ -109,7 +109,7 @@
 <div id="routine-container"></div>
 
 <div class="stats-box">
-  <div>현재 총 볼륨: <span id="total-volume" style="font-weight: bold; color: #4dabf7; font-size: 1.1rem;">0</span> kg</div>
+  <div>현재 총 작업 볼륨: <span id="total-volume" style="font-weight: bold; color: #4dabf7; font-size: 1.1rem;">0</span> kg</div>
   <div id="status-msg" class="log-msg"></div>
   <div class="btn-group">
     <button class="btn-copy" onclick="copyResults()">정밀 분석 데이터 복사</button>
@@ -132,6 +132,22 @@
       <input type="number" step="0.5" id="cfg-ohp-top">
     </div>
     <div class="config-group">
+      <label>Push - 인클라인 DB 프레스 합산 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-inc-db">
+    </div>
+    <div class="config-group">
+      <label>Push - 사레레 덤벨 합산 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-lateral-weight">
+    </div>
+    <div class="config-group">
+      <label>Push - 리어델트 덤벨 합산 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-reardelt-weight">
+    </div>
+    <div class="config-group">
+      <label>Push - 스탠다드 바벨컬 메인 (kg)</label>
+      <input type="number" step="0.5" id="cfg-curl-main">
+    </div>
+    <div class="config-group">
       <label>Pull - 컨벤 데드리프트 탑세트 (kg)</label>
       <input type="number" step="0.5" id="cfg-dead-top">
     </div>
@@ -144,6 +160,10 @@
       <input type="number" step="0.5" id="cfg-cs-row">
     </div>
     <div class="config-group">
+      <label>Pull - 덤벨 라트익 합산 (kg, 양손)</label>
+      <input type="number" step="0.5" id="cfg-pull-lte">
+    </div>
+    <div class="config-group">
       <label>Legs - 백스쿼트 탑세트 (kg)</label>
       <input type="number" step="0.5" id="cfg-squat-top">
     </div>
@@ -152,16 +172,12 @@
       <input type="number" step="0.5" id="cfg-bulg-weight">
     </div>
     <div class="config-group">
-      <label>Legs - 힐 엘리베이티드 고블릿 스쿼트 (kg, 덤벨)</label>
+      <label>Legs - 힐 엘리베이티드 고블릿 스쿼트 (kg, 단일)</label>
       <input type="number" step="0.5" id="cfg-goblet-weight">
     </div>
     <div class="config-group">
-      <label>Arms - 복합 슈퍼세트 베이스 바벨 (kg)</label>
+      <label>Arms - 복합 슈퍼세트 EZ바벨 (kg)</label>
       <input type="number" step="0.5" id="cfg-arms-bb">
-    </div>
-    <div class="config-group">
-      <label>Arms - 스탠다드 바벨 컬 메인 (kg)</label>
-      <input type="number" step="0.5" id="cfg-curl-main">
     </div>
     <div class="config-group">
       <label>Arms - 덤벨 킥백 중량 (kg, 단일)</label>
@@ -190,30 +206,27 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 최신 합의본 기준 기본 중량 세팅
+// 확정 실전 수치 기본값 (벤치 90kg, OHP 55kg, 인클 48kg, 바벨컬 32.5kg)
 const defaultWeights = {
-  push: { benchTop: 95.0, ohpTop: 55.0 },
-  pull: { deadTop: 155.0, rowMain: 70.0, csRow: 40.0 },
+  push: { benchTop: 90.0, ohpTop: 55.0, incDb: 48.0, lateralWeight: 14.0, rearDeltWeight: 12.0, curlMain: 32.5 },
+  pull: { deadTop: 155.0, rowMain: 70.0, csRow: 40.0, pullLte: 18.0 },
   legs: { squatTop: 100.0, bulgWeight: 24.0, gobletWeight: 20.0 },
-  arms: { armsBb: 20.0, curlMain: 20.0, kickbackWeight: 10.0 }
+  arms: { armsBb: 19.5, curlMain: 19.5, kickbackWeight: 10.0 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v21');
+  const saved = localStorage.getItem('ppl_arms_weights_v23');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.legs.gobletWeight) parsed.legs.gobletWeight = 20.0;
-    if (!parsed.arms.armsBb) parsed.arms.armsBb = 20.0;
-    if (!parsed.arms.kickbackWeight) parsed.arms.kickbackWeight = 10.0;
-    return parsed;
+    return Object.assign({}, defaultWeights, parsed);
   } catch(e) {
     return defaultWeights;
   }
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v21', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v23', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -223,48 +236,70 @@ function getRoutines() {
     push: [
       {
         id: "bench",
-        name: "1. 바벨 벤치프레스 (웜업 + 탑세트)",
+        name: "1. 바벨 벤치프레스 (1칸 세미 인클라인)",
         part: "가슴",
-        desc: "흉추 아치 유지, 견갑 하강 고정, 락아웃 삼두 출력 집중",
+        desc: "안전바 필수 확인! 견갑 하강 고정, 바벨 양옆으로 찢는 외회전 토크",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 50, targetReps: 5, isWarmup: true },
           { type: "웜업 3", weight: 70, targetReps: 2, isWarmup: true },
           { type: "Top Set", weight: weights.push.benchTop, targetReps: 3, isWarmup: false },
-          { type: "Back-off 1", weight: weights.push.benchTop - 12.5, targetReps: 6, isWarmup: false },
-          { type: "Back-off 2", weight: weights.push.benchTop - 12.5, targetReps: 6, isWarmup: false },
-          { type: "Back-off 3", weight: weights.push.benchTop - 25.0, targetReps: 8, isWarmup: false }
+          { type: "Back-off 1", weight: weights.push.benchTop - 10.0, targetReps: 6, isWarmup: false },
+          { type: "Back-off 2", weight: weights.push.benchTop - 10.0, targetReps: 6, isWarmup: false },
+          { type: "Back-off 3", weight: weights.push.benchTop - 20.0, targetReps: 8, isWarmup: false }
         ]
       },
       {
         id: "ohp",
-        name: "2. 바벨 OHP (탑세트 + 백오프)",
-        part: "어깨",
-        desc: "복압 잠금, 요추 과신전 방지, 수직 궤적 밀기",
+        name: "2. 스탠딩 바벨 OHP",
+        part: "어깨(전면)",
+        desc: "둔근/복압 완벽 잠금, 요추 과신전 방지, 턱 스치며 수직 궤적 밀기",
         sets: [
-          { type: "Top Set", weight: weights.push.ohpTop, targetReps: 5, isWarmup: false },
-          { type: "Back-off 1", weight: weights.push.ohpTop - 7.5, targetReps: 8, isWarmup: false },
-          { type: "Back-off 2", weight: weights.push.ohpTop - 7.5, targetReps: 8, isWarmup: false }
+          { type: "Top Set", weight: weights.push.ohpTop, targetReps: 3, isWarmup: false },
+          { type: "Back-off 1", weight: weights.push.ohpTop - 10.0, targetReps: 6, isWarmup: false },
+          { type: "Back-off 2", weight: weights.push.ohpTop - 10.0, targetReps: 6, isWarmup: false }
         ]
       },
       {
         id: "inc_db",
-        name: "3. 인클라인 덤벨 프레스 (각 24kg)",
+        name: "3. 인클라인 DB 프레스 (3칸, 45도)",
         part: "가슴(상부)",
         desc: "쇄골 방향 수직 프레스, 흉근 상부 신장성 장력 유지",
         sets: [
-          { type: "본세트 1", weight: 48, targetReps: 10, isWarmup: false },
-          { type: "본세트 2", weight: 48, targetReps: 8, isWarmup: false },
-          { type: "본세트 3", weight: 48, targetReps: 8, isWarmup: false }
+          { type: "본세트 1", weight: weights.push.incDb, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.push.incDb/2}kg` },
+          { type: "본세트 2", weight: weights.push.incDb, targetReps: 8, isWarmup: false, desc: `양손 각 ${weights.push.incDb/2}kg` },
+          { type: "본세트 3", weight: weights.push.incDb, targetReps: 8, isWarmup: false, desc: `양손 각 ${weights.push.incDb/2}kg` }
+        ]
+      },
+      {
+        id: "push_delts",
+        name: "4. [어깨 슈퍼세트] 사레레 + 덤벨 리어 델트",
+        part: "어깨(측면/후면)",
+        desc: "사레레(12~15회) 직후 벤치 엎드려 리어델트(12~15회) 연속 수행 (상완골 내회전 교정)",
+        sets: [
+          { type: "슈퍼세트 1R", weight: weights.push.lateralWeight + weights.push.rearDeltWeight, targetReps: 26, isWarmup: false, desc: `사레레 ${weights.push.lateralWeight/2}kg + 리어델트 ${weights.push.rearDeltWeight/2}kg` },
+          { type: "슈퍼세트 2R", weight: weights.push.lateralWeight + weights.push.rearDeltWeight, targetReps: 26, isWarmup: false, desc: `사레레 ${weights.push.lateralWeight/2}kg + 리어델트 ${weights.push.rearDeltWeight/2}kg` },
+          { type: "슈퍼세트 3R", weight: weights.push.lateralWeight + weights.push.rearDeltWeight, targetReps: 24, isWarmup: false, desc: `사레레 ${weights.push.lateralWeight/2}kg + 리어델트 ${weights.push.rearDeltWeight/2}kg` }
+        ]
+      },
+      {
+        id: "push_curl",
+        name: "5. 스탠다드 바벨 컬 (이두 피니시)",
+        part: "상완이두근",
+        desc: "베이스 20kg 바벨 + 일반 풀그립(엄지 감싸쥠), 손목 중립 유지, 치팅 배제",
+        sets: [
+          { type: "본세트 1", weight: weights.push.curlMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 2", weight: weights.push.curlMain, targetReps: 10, isWarmup: false },
+          { type: "본세트 3", weight: weights.push.curlMain, targetReps: 8, isWarmup: false }
         ]
       }
     ],
     pull: [
       {
         id: "dead",
-        name: "1. 컨벤셔널 데드리프트 (웜업 + 탑세트)",
+        name: "1. 컨벤셔널 데드리프트 (탑세트 + 백오프)",
         part: "등/후면사슬",
-        desc: "바닥 정지 출발, 광배근 하강 텐션 고정, 요추 중립 유지",
+        desc: "스트랩 체결 후 엄지 덮는 강한 풀 악력, 광배근 하강 텐션 고정, 요추 중립",
         sets: [
           { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
@@ -278,7 +313,7 @@ function getRoutines() {
         id: "row",
         name: "2. 바벨 벤트오버 로우",
         part: "등(중하부)",
-        desc: "상체 각도 45도 고정, 팔꿈치로 당기는 궤적 유지",
+        desc: "상체 각도 45도 고정, 팔꿈치로 당기는 궤적 유지, 치팅 반동 금지",
         sets: [
           { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
           { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
@@ -287,13 +322,24 @@ function getRoutines() {
       },
       {
         id: "cs_row",
-        name: "3. 체스트 서포티드 DB 로우 (양손 각 20kg)",
-        part: "등(상부/요추0%)",
-        desc: "벤치 흉골 지지, 척추기립근 개입 배제, 견갑 후인 집중",
+        name: "3. 체스트 서포티드 DB 로우 (요추 부담 0%)",
+        part: "등(상부)",
+        desc: "인클라인 벤치 흉골 지지, 기립근 부담 없이 견갑골 완전 후인",
         sets: [
           { type: "본세트 1", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
           { type: "본세트 2", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
           { type: "본세트 3", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` }
+        ]
+      },
+      {
+        id: "pull_lte",
+        name: "4. 덤벨 라잉 트라이셉스 익스텐션 (삼두 보완)",
+        part: "상완삼두근(장두)",
+        desc: "팔꿈치 고정, 덤벨을 이마 높이까지만 제어 하강(팔꿈치 건병증 방어)",
+        sets: [
+          { type: "본세트 1", weight: weights.pull.pullLte, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.pullLte/2}kg` },
+          { type: "본세트 2", weight: weights.pull.pullLte, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.pullLte/2}kg` },
+          { type: "본세트 3", weight: weights.pull.pullLte, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.pull.pullLte/2}kg` }
         ]
       }
     ],
@@ -301,7 +347,7 @@ function getRoutines() {
       {
         id: "squat",
         name: "1. 백 스쿼트 (뒤꿈치 1.25kg 원판 거치)",
-        part: "하체(대퇴사두/둔근)",
+        part: "하체(사두/둔근)",
         desc: "뒤꿈치 1.25kg 원판 받침 필수! 상승 시 승모근으로 바벨 밀며 수직 상승(앞 쏠림 방지)",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
@@ -327,8 +373,8 @@ function getRoutines() {
       {
         id: "goblet",
         name: "3. 힐 엘리베이티드 덤벨 고블릿 스쿼트",
-        part: "하체(대퇴사두 전면 고립/요추0%)",
-        desc: "뒤꿈치 1.25kg 원판 거치 + 덤벨 가슴 밀착. 상체 수직 유지하며 대퇴사두 피니시",
+        part: "하체(대퇴사두 고립/요추0%)",
+        desc: "뒤꿈치 1.25kg 원판 거치 + 덤벨 가슴 밀착. 상체 수직 유지하며 대퇴사두 완전 피니시",
         sets: [
           { type: "본세트 1", weight: weights.legs.gobletWeight, targetReps: 12, isWarmup: false, desc: `단일 덤벨 ${weights.legs.gobletWeight}kg` },
           { type: "본세트 2", weight: weights.legs.gobletWeight, targetReps: 12, isWarmup: false, desc: `단일 덤벨 ${weights.legs.gobletWeight}kg` },
@@ -340,8 +386,8 @@ function getRoutines() {
       {
         id: "arm_super",
         name: "1. [메인 슈퍼세트] 리버스컬 + 라트익 + 클그벤 (3연속)",
-        part: "상완근/삼두장두/삼두외측",
-        desc: "바벨 1개 연속 수행: 리버스컬(10회) -> 라트익(8~10회, 이마 높이 제어) -> 클그벤(최대 12회)",
+        part: "상완근/전완/삼두",
+        desc: "EZ바(19.5kg) 풀그립: 리버스컬(10회) -> 라트익(8~10회, 이마 제어) -> 클그벤(최대 12회)",
         sets: [
           { type: "슈퍼세트 1R", weight: weights.arms.armsBb * 3, targetReps: 32, isWarmup: false, desc: `바벨 ${weights.arms.armsBb}kg로 3종목 연속 수행` },
           { type: "슈퍼세트 2R", weight: weights.arms.armsBb * 3, targetReps: 30, isWarmup: false, desc: `바벨 ${weights.arms.armsBb}kg로 3종목 연속 수행` },
@@ -351,8 +397,8 @@ function getRoutines() {
       {
         id: "arm_curl",
         name: "2. 스탠다드 바벨 컬 (이두 피크 타깃)",
-        part: "상완이두근(단두/장두)",
-        desc: "언더핸드 그립, 팔꿈치 고정, 치팅 배제 네거티브 통제",
+        part: "상완이두근",
+        desc: "EZ바(19.5kg) 언더핸드 풀그립, 팔꿈치 고정, 치팅 배제 네거티브 2초 통제",
         sets: [
           { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 12, isWarmup: false },
           { type: "본세트 2", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
@@ -363,7 +409,7 @@ function getRoutines() {
         id: "arm_kickback",
         name: "3. 덤벨 킥백 (삼두 외측두 피니셔)",
         part: "삼두외측두(건 스트레스 0%)",
-        desc: "상체 수평 고정, 최상단 1초 락아웃 정지. 팔꿈치 높이 등 라인 위 유지",
+        desc: "상체 수평 고정, 최상단 1초 락아웃 수축. 팔꿈치 높이 등 라인 위 유지",
         sets: [
           { type: "본세트 1", weight: weights.arms.kickbackWeight, targetReps: 15, isWarmup: false, desc: `단일 덤벨 ${weights.arms.kickbackWeight}kg` },
           { type: "본세트 2", weight: weights.arms.kickbackWeight, targetReps: 12, isWarmup: false, desc: `단일 덤벨 ${weights.arms.kickbackWeight}kg` },
@@ -546,6 +592,7 @@ function calc() {
     let messages = [];
 
     exResults.forEach(res => {
+      // 과부하 적응 판정 (+2.5kg 증량 관리)
       if (res.exId === 'dead' && res.success) {
         weights.pull.deadTop += 2.5;
         changed = true;
@@ -558,12 +605,18 @@ function calc() {
         weights.push.benchTop += 2.5;
         changed = true;
         messages.push("벤치프레스 탑세트 +2.5kg 증량");
+      } else if (res.exId === 'bench' && !res.success) {
+        messages.push("벤치프레스 중량 유지");
       }
+
       if (res.exId === 'ohp' && res.success) {
         weights.push.ohpTop += 2.5;
         changed = true;
         messages.push("OHP 탑세트 +2.5kg 증량");
+      } else if (res.exId === 'ohp' && !res.success) {
+        messages.push("OHP 중량 유지");
       }
+
       if (res.exId === 'squat' && res.success) {
         weights.legs.squatTop += 2.5;
         changed = true;
@@ -572,7 +625,7 @@ function calc() {
         messages.push("스쿼트 중량 유지");
       }
 
-      if (res.exId === 'arm_curl' && !res.success) {
+      if (res.exId === 'push_curl' && !res.success) {
         messages.push("바벨컬 중량 동결/유지 (치팅 통제)");
       }
     });
@@ -588,10 +641,10 @@ function calc() {
   } else {
     status.className = "log-msg";
     let curText = "";
-    if (currentTab === 'push') curText = `벤치 탑: ${weights.push.benchTop}kg / OHP: ${weights.push.ohpTop}kg`;
-    if (currentTab === 'pull') curText = `데드 탑: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / CS로우: ${weights.pull.csRow}kg`;
-    if (currentTab === 'legs') curText = `스쿼트 탑: ${weights.legs.squatTop}kg / 불스스: ${weights.legs.bulgWeight}kg / 고블릿: ${weights.legs.gobletWeight}kg`;
-    if (currentTab === 'arms') curText = `슈퍼세트 바벨: ${weights.arms.armsBb}kg / 바벨컬: ${weights.arms.curlMain}kg / 킥백: ${weights.arms.kickbackWeight}kg`;
+    if (currentTab === 'push') curText = `벤치: ${weights.push.benchTop}kg / OHP: ${weights.push.ohpTop}kg / 바벨컬: ${weights.push.curlMain}kg`;
+    if (currentTab === 'pull') curText = `데드: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / 삼두: ${weights.pull.pullLte}kg`;
+    if (currentTab === 'legs') curText = `스쿼트: ${weights.legs.squatTop}kg / 불스스: ${weights.legs.bulgWeight}kg / 고블릿: ${weights.legs.gobletWeight}kg`;
+    if (currentTab === 'arms') curText = `슈퍼세트: ${weights.arms.armsBb}kg / 바벨컬: ${weights.arms.curlMain}kg / 킥백: ${weights.arms.kickbackWeight}kg`;
     status.textContent = `현재 설정: ${curText}`;
   }
 }
@@ -686,15 +739,23 @@ function resetData() {
 function openConfigModal() {
   document.getElementById("cfg-bench-top").value = weights.push.benchTop;
   document.getElementById("cfg-ohp-top").value = weights.push.ohpTop;
+  document.getElementById("cfg-inc-db").value = weights.push.incDb;
+  document.getElementById("cfg-lateral-weight").value = weights.push.lateralWeight;
+  document.getElementById("cfg-reardelt-weight").value = weights.push.rearDeltWeight;
+  document.getElementById("cfg-curl-main").value = weights.push.curlMain;
+  
   document.getElementById("cfg-dead-top").value = weights.pull.deadTop;
   document.getElementById("cfg-row-main").value = weights.pull.rowMain;
   document.getElementById("cfg-cs-row").value = weights.pull.csRow;
+  document.getElementById("cfg-pull-lte").value = weights.pull.pullLte;
+  
   document.getElementById("cfg-squat-top").value = weights.legs.squatTop;
   document.getElementById("cfg-bulg-weight").value = weights.legs.bulgWeight;
   document.getElementById("cfg-goblet-weight").value = weights.legs.gobletWeight;
+  
   document.getElementById("cfg-arms-bb").value = weights.arms.armsBb;
-  document.getElementById("cfg-curl-main").value = weights.arms.curlMain;
   document.getElementById("cfg-kickback-weight").value = weights.arms.kickbackWeight;
+  
   document.getElementById("config-modal").style.display = "flex";
 }
 
@@ -705,14 +766,21 @@ function closeConfigModal() {
 function saveConfigModal() {
   weights.push.benchTop = parseFloat(document.getElementById("cfg-bench-top").value) || weights.push.benchTop;
   weights.push.ohpTop = parseFloat(document.getElementById("cfg-ohp-top").value) || weights.push.ohpTop;
+  weights.push.incDb = parseFloat(document.getElementById("cfg-inc-db").value) || weights.push.incDb;
+  weights.push.lateralWeight = parseFloat(document.getElementById("cfg-lateral-weight").value) || weights.push.lateralWeight;
+  weights.push.rearDeltWeight = parseFloat(document.getElementById("cfg-reardelt-weight").value) || weights.push.rearDeltWeight;
+  weights.push.curlMain = parseFloat(document.getElementById("cfg-curl-main").value) || weights.push.curlMain;
+  
   weights.pull.deadTop = parseFloat(document.getElementById("cfg-dead-top").value) || weights.pull.deadTop;
   weights.pull.rowMain = parseFloat(document.getElementById("cfg-row-main").value) || weights.pull.rowMain;
   weights.pull.csRow = parseFloat(document.getElementById("cfg-cs-row").value) || weights.pull.csRow;
+  weights.pull.pullLte = parseFloat(document.getElementById("cfg-pull-lte").value) || weights.pull.pullLte;
+  
   weights.legs.squatTop = parseFloat(document.getElementById("cfg-squat-top").value) || weights.legs.squatTop;
   weights.legs.bulgWeight = parseFloat(document.getElementById("cfg-bulg-weight").value) || weights.legs.bulgWeight;
   weights.legs.gobletWeight = parseFloat(document.getElementById("cfg-goblet-weight").value) || weights.legs.gobletWeight;
+  
   weights.arms.armsBb = parseFloat(document.getElementById("cfg-arms-bb").value) || weights.arms.armsBb;
-  weights.arms.curlMain = parseFloat(document.getElementById("cfg-curl-main").value) || weights.arms.curlMain;
   weights.arms.kickbackWeight = parseFloat(document.getElementById("cfg-kickback-weight").value) || weights.arms.kickbackWeight;
   
   saveWeights(weights);

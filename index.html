@@ -5,15 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PPL 고중량 분석기</title>
 
-<!-- 모바일 웹앱/PWA 설정 (주소창 제거 및 앱 구동) -->
+<!-- 모바일 웹앱 독립 실행 메타 태그 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PPL분석기">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#121212">
 
-<!-- 인라인 PWA 매니페스트 (별도 파일 없이 앱 인식) -->
-<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PPL%20%EA%B3%A0%EC%A4%91%EB%9F%89%20%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22short_name%22%3A%22PPL%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121212%22%2C%22theme_color%22%3A%22%23121212%22%7D">
+<!-- 인라인 SVG 아이콘 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231971c2'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white' font-family='sans-serif' font-weight='900'>P</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231971c2'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white' font-family='sans-serif' font-weight='900'>P</text></svg>">
+
+<!-- 완전한 인라인 PWA 매니페스트 -->
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PPL%20%EA%B3%A0%EC%A4%91%EB%9F%89%20%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22short_name%22%3A%22PPL%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121212%22%2C%22theme_color%22%3A%22%23121212%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Crect%20width%3D'100'%20height%3D'100'%20rx%3D'20'%20fill%3D'%231971c2'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'55%25'%20dominant-baseline%3D'middle'%20text-anchor%3D'middle'%20font-size%3D'50'%20fill%3D'white'%20font-family%3D'sans-serif'%20font-weight%3D'900'%3EP%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 
 <style>
   body { 
@@ -86,9 +90,9 @@
 
 <div class="tab-group">
   <button class="tab-btn" onclick="switchTab('push')">Push</button>
-  <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
+  <button class="tab-btn active" onclick="switchTab('pull')">Pull</button>
   <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
-  <button class="tab-btn active" onclick="switchTab('arms')">Arms</button>
+  <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
 </div>
 
 <div class="monitor-box">
@@ -209,8 +213,20 @@
 </div>
 
 <script>
+// 인라인 Service Worker 등록 (PWA 정식 앱 설치 조건 만족)
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', (e) => self.skipWaiting());
+    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
 const FIXED_REST = 90;
-let currentTab = 'arms';
+let currentTab = 'pull';
 
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
@@ -223,7 +239,7 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 데드리프트 탑세트 157.5kg, 체스트 로우 42kg, 이지바 실측 9.0kg(19.0kg 세팅) 정밀 데이터
+// 데드리프트 탑세트 157.5kg, 체스트 로우 42kg, 이지바 실측 9.0kg 정밀 데이터
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
   pull: { deadTop: 157.5, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
@@ -232,7 +248,7 @@ const defaultWeights = {
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v28');
+  const saved = localStorage.getItem('ppl_arms_weights_v29');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
@@ -243,7 +259,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v28', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v29', JSON.stringify(data));
 }
 
 let weights = getWeights();

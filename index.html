@@ -2,12 +2,33 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PPL 고중량 분석기</title>
+
+<!-- 모바일 웹앱/PWA 설정 (주소창 제거 및 앱 구동) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PPL분석기">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#121212">
+
+<!-- 인라인 PWA 매니페스트 (별도 파일 없이 앱 인식) -->
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PPL%20%EA%B3%A0%EC%A4%91%EB%9F%89%20%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22short_name%22%3A%22PPL%EB%B6%84%EC%84%9D%EA%B8%B0%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121212%22%2C%22theme_color%22%3A%22%23121212%22%7D">
+
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #121212; color: #fff; margin: 0; padding: 12px; }
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    background: #121212; 
+    color: #fff; 
+    margin: 0; 
+    padding: 12px; 
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  h1 { font-size: 1.2rem; color: #4dabf7; margin: 0; font-weight: 800; }
+  h1 { font-size: 1.15rem; color: #4dabf7; margin: 0; font-weight: 800; }
   .btn-config { background: #343a40; color: #adb5bd; border: 1px solid #495057; border-radius: 6px; padding: 5px 9px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
   
   .tab-group { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -26,8 +47,8 @@
   .set-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #2a2a2a; font-size: 0.8rem; }
   .set-row:last-child { border-bottom: none; }
   .warmup-text { color: #868e96; }
-  .input-reps { width: 40px; background: #2a2a2a; border: 1px solid #444; color: #fff; text-align: center; border-radius: 4px; padding: 4px; font-size: 0.85rem; }
-  input[type="checkbox"] { width: 24px; height: 24px; accent-color: #4dabf7; margin-left: 8px; cursor: pointer; }
+  .input-reps { width: 44px; background: #2a2a2a; border: 1px solid #444; color: #fff; text-align: center; border-radius: 4px; padding: 6px 2px; font-size: 0.9rem; }
+  input[type="checkbox"] { width: 26px; height: 26px; accent-color: #4dabf7; margin-left: 8px; cursor: pointer; }
   .right-controls { display: flex; align-items: center; }
   
   .meta-box { background: #1e1e1e; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; gap: 8px; justify-content: space-between; }
@@ -59,8 +80,8 @@
 <body>
 
 <div class="header-row">
-  <h1>PPL 고중량 분석기 (스트렝스 420kg 복구)</h1>
-  <button class="btn-config" onclick="openConfigModal()">⚙️ 루틴/중량 설정</button>
+  <h1>PPL 고중량 분석기 (420kg 복구)</h1>
+  <button class="btn-config" onclick="openConfigModal()">⚙️ 설정</button>
 </div>
 
 <div class="tab-group">
@@ -202,7 +223,7 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 데드리프트 탑세트 157.5kg, 체스트 로우 42kg, 이지바 실측 9.0kg(양쪽 5kg 체결 시 19.0kg) 정밀 반영
+// 데드리프트 탑세트 157.5kg, 체스트 로우 42kg, 이지바 실측 9.0kg(19.0kg 세팅) 정밀 데이터
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
   pull: { deadTop: 157.5, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
@@ -211,7 +232,7 @@ const defaultWeights = {
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v27');
+  const saved = localStorage.getItem('ppl_arms_weights_v28');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
@@ -222,7 +243,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v27', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v28', JSON.stringify(data));
 }
 
 let weights = getWeights();

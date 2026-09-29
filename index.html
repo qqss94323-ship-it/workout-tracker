@@ -64,10 +64,10 @@
 </div>
 
 <div class="tab-group">
-  <button class="tab-btn active" onclick="switchTab('push')">Push</button>
+  <button class="tab-btn" onclick="switchTab('push')">Push</button>
   <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
   <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
-  <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
+  <button class="tab-btn active" onclick="switchTab('arms')">Arms</button>
 </div>
 
 <div class="monitor-box">
@@ -172,7 +172,7 @@
       <input type="number" step="0.5" id="cfg-goblet-weight">
     </div>
     <div class="config-group">
-      <label>Arms - 복합 슈퍼세트 EZ바벨 (kg)</label>
+      <label>Arms - 복합 슈퍼세트 EZ바벨 (kg, 9.0kg봉 기준)</label>
       <input type="number" step="0.5" id="cfg-arms-bb">
     </div>
     <div class="config-group">
@@ -189,7 +189,7 @@
 
 <script>
 const FIXED_REST = 90;
-let currentTab = 'push';
+let currentTab = 'arms';
 
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
@@ -202,16 +202,16 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 확정 실전 수치 기본값 (벤치 100kg, OHP 52.5kg, 인클 48kg, 바벨컬 32.5kg)
+// 데드리프트 탑세트 157.5kg, 체스트 로우 42kg, 이지바 실측 9.0kg(양쪽 5kg 체결 시 19.0kg) 정밀 반영
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
-  pull: { deadTop: 155.0, rowMain: 70.0, csRow: 40.0, pullLte: 18.0 },
+  pull: { deadTop: 157.5, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
   legs: { squatTop: 105.0, bulgWeight: 24.0, gobletWeight: 20.0 },
-  arms: { armsBb: 19.5, curlMain: 19.5, kickbackWeight: 10.0 }
+  arms: { armsBb: 19.0, curlMain: 19.0, kickbackWeight: 10.0 }
 };
 
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v24');
+  const saved = localStorage.getItem('ppl_arms_weights_v27');
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
@@ -222,7 +222,7 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v24', JSON.stringify(data));
+  localStorage.setItem('ppl_arms_weights_v27', JSON.stringify(data));
 }
 
 let weights = getWeights();
@@ -234,7 +234,7 @@ function getRoutines() {
         id: "bench",
         name: "1. 바벨 벤치프레스 (1칸 세미 인클라인)",
         part: "가슴",
-        desc: "안전바 필수 확인! 양쪽 [15+15+10kg], 바벨 양옆으로 찢는 외회전 토크",
+        desc: "안전바 필수 확인! 양쪽 [15+15+10kg], 바벨 외회전 토크 유지",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 50, targetReps: 5, isWarmup: true },
@@ -260,7 +260,7 @@ function getRoutines() {
         id: "inc_db",
         name: "3. 인클라인 DB 프레스 (3칸, 45도)",
         part: "가슴(상부)",
-        desc: "쇄골 방향 수직 프레스, 10-10-10회 볼륨 누적 타깃",
+        desc: "쇄골 방향 수직 프레스, 10-10-10회 볼륨 타깃",
         sets: [
           { type: "본세트 1", weight: weights.push.incDb, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.push.incDb/2}kg` },
           { type: "본세트 2", weight: weights.push.incDb, targetReps: 10, isWarmup: false, desc: `양손 각 ${weights.push.incDb/2}kg` },
@@ -295,11 +295,11 @@ function getRoutines() {
         id: "dead",
         name: "1. 컨벤셔널 데드리프트 (탑세트 + 백오프)",
         part: "등/후면사슬",
-        desc: "스트랩 체결 후 엄지 덮는 강한 풀 악력, 광배근 하강 텐션 고정, 요추 중립",
+        desc: "탑세트 157.5kg(양쪽 15*4 + 2.5 + 1.25kg), 광배근 하강 텐션 고정, 요추 중립",
         sets: [
           { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
-          { type: "웜업 3", weight: 120, targetReps: 1, isWarmup: true },
+          { type: "웜업 3", weight: 130, targetReps: 1, isWarmup: true },
           { type: "Top Set", weight: weights.pull.deadTop, targetReps: 3, isWarmup: false },
           { type: "Back-off 1", weight: weights.pull.deadTop - 20, targetReps: 5, isWarmup: false },
           { type: "Back-off 2", weight: weights.pull.deadTop - 20, targetReps: 5, isWarmup: false }
@@ -309,10 +309,10 @@ function getRoutines() {
         id: "row",
         name: "2. 바벨 벤트오버 로우",
         part: "등(중하부)",
-        desc: "상체 각도 45도 고정, 팔꿈치로 당기는 궤적 유지, 치팅 반동 금지",
+        desc: "상체 각도 45도 고정, 팔꿈치로 당기는 궤적 유지, 목표 9-9-8회 도전",
         sets: [
-          { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
-          { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false },
+          { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false },
+          { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false },
           { type: "본세트 3", weight: weights.pull.rowMain, targetReps: 8, isWarmup: false }
         ]
       },
@@ -320,7 +320,7 @@ function getRoutines() {
         id: "cs_row",
         name: "3. 체스트 서포티드 DB 로우 (요추 부담 0%)",
         part: "등(상부)",
-        desc: "인클라인 벤치 흉골 지지, 기립근 부담 없이 견갑골 완전 후인",
+        desc: "인클라인 벤치 흉골 지지, 양손 각 21kg 증량 세팅, 견갑골 완전 후인",
         sets: [
           { type: "본세트 1", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
           { type: "본세트 2", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
@@ -383,18 +383,18 @@ function getRoutines() {
         id: "arm_super",
         name: "1. [메인 슈퍼세트] 리버스컬 + 라트익 + 클그벤 (3연속)",
         part: "상완근/전완/삼두",
-        desc: "EZ바(19.5kg) 풀그립: 리버스컬(10회) -> 라트익(8~10회) -> 클그벤(최대 12회)",
+        desc: "이지바(9.0kg) + 양쪽 5kg 체결 = 19.0kg: 리버스컬(10회) -> 라트익(8~10회) -> 클그벤(최대 12회)",
         sets: [
-          { type: "슈퍼세트 1R", weight: weights.arms.armsBb * 3, targetReps: 32, isWarmup: false, desc: `바벨 ${weights.arms.armsBb}kg로 3종목 연속 수행` },
-          { type: "슈퍼세트 2R", weight: weights.arms.armsBb * 3, targetReps: 30, isWarmup: false, desc: `바벨 ${weights.arms.armsBb}kg로 3종목 연속 수행` },
-          { type: "슈퍼세트 3R", weight: weights.arms.armsBb * 3, targetReps: 28, isWarmup: false, desc: `바벨 ${weights.arms.armsBb}kg로 3종목 연속 수행` }
+          { type: "슈퍼세트 1R", weight: weights.arms.armsBb * 3, targetReps: 32, isWarmup: false, desc: `이지바 ${weights.arms.armsBb}kg(봉9.0+양쪽5kg)로 3종목 연속` },
+          { type: "슈퍼세트 2R", weight: weights.arms.armsBb * 3, targetReps: 30, isWarmup: false, desc: `이지바 ${weights.arms.armsBb}kg(봉9.0+양쪽5kg)로 3종목 연속` },
+          { type: "슈퍼세트 3R", weight: weights.arms.armsBb * 3, targetReps: 28, isWarmup: false, desc: `이지바 ${weights.arms.armsBb}kg(봉9.0+양쪽5kg)로 3종목 연속` }
         ]
       },
       {
         id: "arm_curl",
         name: "2. 스탠다드 바벨 컬 (이두 피크 타깃)",
         part: "상완이두근",
-        desc: "EZ바(19.5kg) 언더핸드 풀그립, 네거티브 2초 통제",
+        desc: "이지바 19.0kg 언더핸드 풀그립, 네거티브 2초 통제",
         sets: [
           { type: "본세트 1", weight: weights.arms.curlMain, targetReps: 12, isWarmup: false },
           { type: "본세트 2", weight: weights.arms.curlMain, targetReps: 10, isWarmup: false },
@@ -633,9 +633,9 @@ function calc() {
     status.className = "log-msg";
     let curText = "";
     if (currentTab === 'push') curText = `벤치: ${weights.push.benchTop}kg / OHP: ${weights.push.ohpTop}kg / 인클DB: 10-10-10회 / 바벨컬: ${weights.push.curlMain}kg`;
-    if (currentTab === 'pull') curText = `데드: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / 삼두: ${weights.pull.pullLte}kg`;
+    if (currentTab === 'pull') curText = `데드: ${weights.pull.deadTop}kg / 로우: ${weights.pull.rowMain}kg / 체스트로우: ${weights.pull.csRow}kg / 삼두: ${weights.pull.pullLte}kg`;
     if (currentTab === 'legs') curText = `스쿼트: ${weights.legs.squatTop}kg / 불스스: ${weights.legs.bulgWeight}kg / 고블릿: ${weights.legs.gobletWeight}kg`;
-    if (currentTab === 'arms') curText = `슈퍼세트: ${weights.arms.armsBb}kg / 바벨컬: ${weights.arms.curlMain}kg / 킥백: ${weights.arms.kickbackWeight}kg`;
+    if (currentTab === 'arms') curText = `슈퍼세트: ${weights.arms.armsBb}kg(봉9.0+양쪽5kg) / 바벨컬: ${weights.arms.curlMain}kg / 킥백: ${weights.arms.kickbackWeight}kg`;
     status.textContent = `현재 설정: ${curText}`;
   }
 }

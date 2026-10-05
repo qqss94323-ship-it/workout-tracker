@@ -86,9 +86,9 @@
 </div>
 
 <div class="tab-group">
-  <button class="tab-btn" onclick="switchTab('push')">Push</button>
+  <button class="tab-btn active" onclick="switchTab('push')">Push</button>
   <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
-  <button class="tab-btn active" onclick="switchTab('legs')">Legs</button>
+  <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
   <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
 </div>
 
@@ -221,7 +221,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const FIXED_REST = 90;
-let currentTab = 'legs';
+let currentTab = 'push'; // 오늘자 가슴 세션 시작 기준
 
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
@@ -234,15 +234,25 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
+// 목표치 및 기본값
+const TARGET_MAP = {
+  bench: { goal: 100.0, step: 2.5 },
+  ohp: { goal: 60.0, step: 2.5 },
+  dead: { goal: 160.0, step: 2.5 },
+  squat: { goal: 140.0, step: 2.5 }
+};
+
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
   pull: { deadTop: 157.5, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
-  legs: { squatTop: 107.5, bulgWeight: 24.0, gobletWeight: 20.0 },
+  legs: { squatTop: 112.5, bulgWeight: 24.0, gobletWeight: 20.0 },
   arms: { armsBb: 19.0, curlMain: 19.0, kickbackWeight: 10.0 }
 };
 
+const STORAGE_KEY = 'ppl_arms_weights_v32';
+
 function getWeights() {
-  const saved = localStorage.getItem('ppl_arms_weights_v31');
+  const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return defaultWeights;
   try {
     const parsed = JSON.parse(saved);
@@ -253,24 +263,29 @@ function getWeights() {
 }
 
 function saveWeights(data) {
-  localStorage.setItem('ppl_arms_weights_v31', JSON.stringify(data));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 let weights = getWeights();
 
 function getRoutines() {
+  const benchTargetReps = weights.push.benchTop >= TARGET_MAP.bench.goal ? 5 : 3;
+  const ohpTargetReps = weights.push.ohpTop >= TARGET_MAP.ohp.goal ? 5 : 3;
+  const deadTargetReps = weights.pull.deadTop >= TARGET_MAP.dead.goal ? 5 : 3;
+  const squatTargetReps = weights.legs.squatTop >= TARGET_MAP.squat.goal ? 5 : 3;
+
   return {
     push: [
       {
         id: "bench",
         name: "1. 바벨 벤치프레스 (1칸 세미 인클라인)",
         part: "가슴",
-        desc: "안전바 필수 확인! 양쪽 [15+15+10kg], 바벨 외회전 토크 유지",
+        desc: "등판 논슬립 패드 필수! 안전바 점검. 100kg 진입 후 5회 확장 목표",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 50, targetReps: 5, isWarmup: true },
           { type: "웜업 3", weight: 70, targetReps: 2, isWarmup: true },
-          { type: "Top Set", weight: weights.push.benchTop, targetReps: 3, isWarmup: false },
+          { type: "Top Set", weight: weights.push.benchTop, targetReps: benchTargetReps, isWarmup: false },
           { type: "Back-off 1", weight: weights.push.benchTop - 10.0, targetReps: 6, isWarmup: false },
           { type: "Back-off 2", weight: weights.push.benchTop - 10.0, targetReps: 6, isWarmup: false },
           { type: "Back-off 3", weight: weights.push.benchTop - 20.0, targetReps: 8, isWarmup: false }
@@ -280,9 +295,9 @@ function getRoutines() {
         id: "ohp",
         name: "2. 스탠딩 바벨 OHP",
         part: "어깨(전면)",
-        desc: "둔근/복압 완벽 잠금, 탑세트 52.5kg 도전 / 백오프 45.0kg 고정",
+        desc: "둔근/복압 완벽 잠금, 60kg 목표 진입 중 / 백오프 45.0kg 고정",
         sets: [
-          { type: "Top Set", weight: weights.push.ohpTop, targetReps: 3, isWarmup: false },
+          { type: "Top Set", weight: weights.push.ohpTop, targetReps: ohpTargetReps, isWarmup: false },
           { type: "Back-off 1", weight: 45.0, targetReps: 6, isWarmup: false },
           { type: "Back-off 2", weight: 45.0, targetReps: 6, isWarmup: false }
         ]
@@ -326,12 +341,12 @@ function getRoutines() {
         id: "dead",
         name: "1. 컨벤셔널 데드리프트 (탑세트 + 백오프)",
         part: "등/후면사슬",
-        desc: "탑세트 157.5kg(양쪽 15*4 + 2.5 + 1.25kg), 광배근 하강 텐션 고정, 요추 중립",
+        desc: "경추 중립 엄수, 160kg 목표 진입 중 (목표 도달 시 5회 확장)",
         sets: [
           { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
           { type: "웜업 3", weight: 130, targetReps: 1, isWarmup: true },
-          { type: "Top Set", weight: weights.pull.deadTop, targetReps: 3, isWarmup: false },
+          { type: "Top Set", weight: weights.pull.deadTop, targetReps: deadTargetReps, isWarmup: false },
           { type: "Back-off 1", weight: weights.pull.deadTop - 20, targetReps: 5, isWarmup: false },
           { type: "Back-off 2", weight: weights.pull.deadTop - 20, targetReps: 5, isWarmup: false }
         ]
@@ -375,12 +390,12 @@ function getRoutines() {
         id: "squat",
         name: "1. 백 스쿼트 (뒤꿈치 1.25kg 원판 거치)",
         part: "하체(사두/둔근)",
-        desc: "안전바 필수! 뒤꿈치 원판 받침 필수! 상승 시 상체 각도 유지하며 수직 상승",
+        desc: "안전바 필수! 뒤꿈치 원판 거치, 140kg 목표 계단식 과부하 진행 중",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 3", weight: 80, targetReps: 2, isWarmup: true },
-          { type: "Top Set", weight: weights.legs.squatTop, targetReps: 3, isWarmup: false },
+          { type: "Top Set", weight: weights.legs.squatTop, targetReps: squatTargetReps, isWarmup: false },
           { type: "Back-off 1", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
           { type: "Back-off 2", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
           { type: "Back-off 3", weight: weights.legs.squatTop - 25.0, targetReps: 8, isWarmup: false }
@@ -588,6 +603,7 @@ function calc() {
     const rows = card.querySelectorAll('.set-row');
     let exAllChecked = true;
     let exTargetsMet = true;
+    let topRepsDone = 0;
 
     rows.forEach(row => {
       const cb = row.querySelector('input[type="checkbox"]');
@@ -596,11 +612,15 @@ function calc() {
       const actualReps = parseInt(input.value) || 0;
       const targetReps = parseInt(input.dataset.target);
       const isWarmup = cb.dataset.warmup === "true";
+      const isTopSet = row.dataset.setType.includes("Top Set");
 
       if (cb.checked) {
         vol += weight * actualReps;
         if (!isWarmup && actualReps < targetReps) {
           exTargetsMet = false;
+        }
+        if (isTopSet) {
+          topRepsDone = actualReps;
         }
       } else if (!isWarmup) {
         exAllChecked = false;
@@ -608,7 +628,7 @@ function calc() {
       }
     });
 
-    exResults.push({ exId, completed: exAllChecked, success: exTargetsMet });
+    exResults.push({ exId, completed: exAllChecked, success: exTargetsMet, topReps: topRepsDone });
   });
 
   document.getElementById("total-volume").textContent = vol.toLocaleString();
@@ -618,35 +638,39 @@ function calc() {
     let changed = false;
     let messages = [];
 
+    // 이중 진행(Double Progression) 판정 로직
+    function handleProgression(key, category, propName, res, label) {
+      const rule = TARGET_MAP[key];
+      const curW = weights[category][propName];
+
+      if (curW < rule.goal) {
+        // 목표치 전: 3회 달성 시 +2.5kg 증량
+        if (res.success) {
+          weights[category][propName] += rule.step;
+          changed = true;
+          messages.push(`${label} 탑세트 +${rule.step}kg 증량 (${weights[category][propName]}kg)`);
+        } else {
+          messages.push(`${label} 중량 유지 (3회 완수 후 도전)`);
+        }
+      } else {
+        // 목표치 도달 후: 5회 완성 전까지 동결하고 반복수 확장
+        if (res.topReps >= 5 && res.success) {
+          weights[category][propName] += rule.step;
+          changed = true;
+          messages.push(`${label} [관문 돌파!] 5회 완수 -> +${rule.step}kg 증량 (${weights[category][propName]}kg)`);
+        } else if (res.success) {
+          messages.push(`${label} ${curW}kg 안착 성공! (다음 목표: 5회 완수까지 횟수 확장)`);
+        } else {
+          messages.push(`${label} ${curW}kg 유지 및 궤적 안정화`);
+        }
+      }
+    }
+
     exResults.forEach(res => {
-      if (res.exId === 'dead' && res.success) {
-        weights.pull.deadTop += 2.5;
-        changed = true;
-        messages.push("데드리프트 탑세트 +2.5kg 증량");
-      } else if (res.exId === 'dead' && !res.success) {
-        messages.push("데드리프트 중량 유지");
-      }
-
-      if (res.exId === 'bench' && res.success) {
-        messages.push("벤치프레스 100kg 동결/유지 (완벽한 제어력 확보)");
-      }
-
-      if (res.exId === 'ohp' && res.success) {
-        weights.push.ohpTop += 2.5;
-        changed = true;
-        messages.push("OHP 탑세트 +2.5kg 증량");
-      } else if (res.exId === 'ohp' && !res.success) {
-        messages.push("OHP 중량 유지");
-      }
-
-      if (res.exId === 'squat' && res.success) {
-        weights.legs.squatTop += 2.5;
-        changed = true;
-        messages.push("스쿼트 탑세트 +2.5kg 증량");
-      } else if (res.exId === 'squat' && !res.success) {
-        messages.push("스쿼트 중량 유지");
-      }
-
+      if (res.exId === 'bench') handleProgression('bench', 'push', 'benchTop', res, '벤치프레스');
+      if (res.exId === 'ohp') handleProgression('ohp', 'push', 'ohpTop', res, 'OHP');
+      if (res.exId === 'dead') handleProgression('dead', 'pull', 'deadTop', res, '데드리프트');
+      if (res.exId === 'squat') handleProgression('squat', 'legs', 'squatTop', res, '스쿼트');
       if (res.exId === 'push_curl' && !res.success) {
         messages.push("바벨컬 중량 동결/유지 (치팅 통제)");
       }
@@ -658,7 +682,7 @@ function calc() {
       status.innerHTML = `세션 완료: ${messages.join(' | ')}`;
     } else {
       status.className = "log-msg failed";
-      status.innerHTML = `세션 완료 (미달/유지 종목 관리): ${messages.join(' | ')}`;
+      status.innerHTML = `세션 완료 (반복수 확장/관리): ${messages.join(' | ')}`;
     }
   } else {
     status.className = "log-msg";

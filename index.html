@@ -86,8 +86,8 @@
 </div>
 
 <div class="tab-group">
-  <button class="tab-btn active" onclick="switchTab('push')">Push</button>
-  <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
+  <button class="tab-btn" onclick="switchTab('push')">Push</button>
+  <button class="tab-btn active" onclick="switchTab('pull')">Pull</button>
   <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
   <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
 </div>
@@ -221,7 +221,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const FIXED_REST = 90;
-let currentTab = 'push'; // 오늘자 가슴 세션 시작 기준
+let currentTab = 'pull'; // 내일 진행할 Pull(데드) 기준 자동 포커스
 
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
@@ -234,7 +234,6 @@ function updateElapsed() {
 }
 setInterval(updateElapsed, 1000);
 
-// 목표치 및 기본값
 const TARGET_MAP = {
   bench: { goal: 100.0, step: 2.5 },
   ohp: { goal: 60.0, step: 2.5 },
@@ -244,12 +243,12 @@ const TARGET_MAP = {
 
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
-  pull: { deadTop: 157.5, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
+  pull: { deadTop: 160.0, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
   legs: { squatTop: 112.5, bulgWeight: 24.0, gobletWeight: 20.0 },
   arms: { armsBb: 19.0, curlMain: 19.0, kickbackWeight: 10.0 }
 };
 
-const STORAGE_KEY = 'ppl_arms_weights_v32';
+const STORAGE_KEY = 'ppl_arms_weights_v33';
 
 function getWeights() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -280,7 +279,7 @@ function getRoutines() {
         id: "bench",
         name: "1. 바벨 벤치프레스 (1칸 세미 인클라인)",
         part: "가슴",
-        desc: "등판 논슬립 패드 필수! 안전바 점검. 100kg 진입 후 5회 확장 목표",
+        desc: "등판 논슬립 패드 필수! 100kg 탑세트(3회 기본, 여유 시 4회 고려 / 5회 억지 금지)",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 50, targetReps: 5, isWarmup: true },
@@ -341,7 +340,7 @@ function getRoutines() {
         id: "dead",
         name: "1. 컨벤셔널 데드리프트 (탑세트 + 백오프)",
         part: "등/후면사슬",
-        desc: "경추 중립 엄수, 160kg 목표 진입 중 (목표 도달 시 5회 확장)",
+        desc: "경추 중립 엄수! 두통 잔여 시 무리한 160kg 금지. 백오프는 2.5~3분 충분히 휴식 권장",
         sets: [
           { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
@@ -366,7 +365,7 @@ function getRoutines() {
         id: "cs_row",
         name: "3. 체스트 서포티드 DB 로우 (요추 부담 0%)",
         part: "등(상부)",
-        desc: "인클라인 벤치 흉골 지지, 양손 각 21kg 증량 세팅, 견갑골 완전 후인",
+        desc: "인클라인 벤치 흉골 지지, 양손 각 21kg 세팅, 견갑골 완전 후인",
         sets: [
           { type: "본세트 1", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
           { type: "본세트 2", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
@@ -390,7 +389,7 @@ function getRoutines() {
         id: "squat",
         name: "1. 백 스쿼트 (뒤꿈치 1.25kg 원판 거치)",
         part: "하체(사두/둔근)",
-        desc: "안전바 필수! 뒤꿈치 원판 거치, 140kg 목표 계단식 과부하 진행 중",
+        desc: "안전바 필수! 뒤꿈치 원판 거치, 140kg(최종 145kg) 핵심 견인 종목",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 60, targetReps: 5, isWarmup: true },
@@ -597,6 +596,7 @@ function calc() {
   const cards = document.querySelectorAll('.card');
   let allCardsFullyChecked = true;
   let exResults = [];
+  const userRpe = parseFloat(document.getElementById("session-rpe").value) || 8.0;
 
   cards.forEach(card => {
     const exId = card.dataset.exId;
@@ -638,30 +638,38 @@ function calc() {
     let changed = false;
     let messages = [];
 
-    // 이중 진행(Double Progression) 판정 로직
+    // RPE + 반복수 결합 스마트 판정 함수
     function handleProgression(key, category, propName, res, label) {
       const rule = TARGET_MAP[key];
       const curW = weights[category][propName];
 
+      // 피로도 과다 (RPE 9.0 이상) 시 안전 우선 동결
+      if (userRpe >= 9.0) {
+        messages.push(`${label} ${curW}kg 유지 (체감 피로도 RPE ${userRpe}로 증량 보류 및 궤적 안정화)`);
+        return;
+      }
+
       if (curW < rule.goal) {
-        // 목표치 전: 3회 달성 시 +2.5kg 증량
-        if (res.success) {
+        // 목표 전: 완수 및 RPE 8.0 이하일 때만 증량
+        if (res.success && userRpe <= 8.0) {
           weights[category][propName] += rule.step;
           changed = true;
-          messages.push(`${label} 탑세트 +${rule.step}kg 증량 (${weights[category][propName]}kg)`);
+          messages.push(`${label} 탑세트 +${rule.step}kg 증량! (${weights[category][propName]}kg 도전)`);
+        } else if (res.success && userRpe <= 8.5) {
+          messages.push(`${label} ${curW}kg 유지 (완수했으나 RPE 8.5로 숙련도 우선 확보)`);
         } else {
-          messages.push(`${label} 중량 유지 (3회 완수 후 도전)`);
+          messages.push(`${label} ${curW}kg 유지 (반복수 클린 완수 후 재도전)`);
         }
       } else {
-        // 목표치 도달 후: 5회 완성 전까지 동결하고 반복수 확장
-        if (res.topReps >= 5 && res.success) {
+        // 목표치 도달 후: 5회 완수 + RPE 8.5 이하 시 관문 돌파
+        if (res.topReps >= 5 && res.success && userRpe <= 8.5) {
           weights[category][propName] += rule.step;
           changed = true;
           messages.push(`${label} [관문 돌파!] 5회 완수 -> +${rule.step}kg 증량 (${weights[category][propName]}kg)`);
         } else if (res.success) {
-          messages.push(`${label} ${curW}kg 안착 성공! (다음 목표: 5회 완수까지 횟수 확장)`);
+          messages.push(`${label} ${curW}kg 안착 중 (현재 ${res.topReps}회 / 5회 목표까지 확장 진행)`);
         } else {
-          messages.push(`${label} ${curW}kg 유지 및 궤적 안정화`);
+          messages.push(`${label} ${curW}kg 유지 및 컨디션 관리`);
         }
       }
     }

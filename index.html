@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PPL 고중량 분석기</title>
+<title>PPL 고중량 분석기 (420kg 복구)</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -87,8 +87,8 @@
 
 <div class="tab-group">
   <button class="tab-btn" onclick="switchTab('push')">Push</button>
-  <button class="tab-btn active" onclick="switchTab('pull')">Pull</button>
-  <button class="tab-btn" onclick="switchTab('legs')">Legs</button>
+  <button class="tab-btn" onclick="switchTab('pull')">Pull</button>
+  <button class="tab-btn active" onclick="switchTab('legs')">Legs</button>
   <button class="tab-btn" onclick="switchTab('arms')">Arms</button>
 </div>
 
@@ -221,7 +221,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const FIXED_REST = 90;
-let currentTab = 'pull'; // 내일 진행할 Pull(데드) 기준 자동 포커스
+let currentTab = 'legs'; // 오늘 스쿼트 120kg 탑세트 진행 세션 자동 포커스
 
 let sessionStartTime = Date.now();
 let totalElapsedSeconds = 0;
@@ -244,11 +244,11 @@ const TARGET_MAP = {
 const defaultWeights = {
   push: { benchTop: 100.0, ohpTop: 52.5, incDb: 48.0, lateralWeight: 8.0, curlMain: 32.5 },
   pull: { deadTop: 160.0, rowMain: 70.0, csRow: 42.0, pullLte: 18.0 },
-  legs: { squatTop: 112.5, bulgWeight: 24.0, gobletWeight: 20.0 },
+  legs: { squatTop: 120.0, bulgWeight: 24.0, gobletWeight: 20.0 }, // 스쿼트 120kg 탑세트 반영
   arms: { armsBb: 19.0, curlMain: 19.0, kickbackWeight: 10.0 }
 };
 
-const STORAGE_KEY = 'ppl_arms_weights_v33';
+const STORAGE_KEY = 'ppl_arms_weights_v34';
 
 function getWeights() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -271,7 +271,7 @@ function getRoutines() {
   const benchTargetReps = weights.push.benchTop >= TARGET_MAP.bench.goal ? 5 : 3;
   const ohpTargetReps = weights.push.ohpTop >= TARGET_MAP.ohp.goal ? 5 : 3;
   const deadTargetReps = weights.pull.deadTop >= TARGET_MAP.dead.goal ? 5 : 3;
-  const squatTargetReps = weights.legs.squatTop >= TARGET_MAP.squat.goal ? 5 : 3;
+  const squatTargetReps = weights.legs.squatTop >= 120.0 ? 3 : 5; // 120kg 진입 시 안전 위해 3회 설정
 
   return {
     push: [
@@ -338,9 +338,9 @@ function getRoutines() {
     pull: [
       {
         id: "dead",
-        name: "1. 컨벤셔널 데드리프트 (탑세트 + 백오프)",
+        name: "1. 컨벤셔널 데드리프트 (10mm 레버 벨트 + WSF/초크)",
         part: "등/후면사슬",
-        desc: "경추 중립 엄수! 두통 잔여 시 무리한 160kg 금지. 백오프는 2.5~3분 충분히 휴식 권장",
+        desc: "10mm 레버 벨트 360도 브레이싱 필수! 경추 중립, 백오프는 2.5~3분 충분히 휴식",
         sets: [
           { type: "웜업 1", weight: 60, targetReps: 5, isWarmup: true },
           { type: "웜업 2", weight: 100, targetReps: 3, isWarmup: true },
@@ -352,9 +352,9 @@ function getRoutines() {
       },
       {
         id: "row",
-        name: "2. 바벨 벤트오버 로우",
+        name: "2. 바벨 벤트오버 로우 (익스트림 그립 체결)",
         part: "등(중하부)",
-        desc: "상체 각도 45도 고정, 팔꿈치로 당기는 궤적 유지, 목표 9-9-8회 도전",
+        desc: "제로투 익스트림 그립(M) 체결로 전완 탈진 방어, 상체 45도 고정, 목표 9-9-8회",
         sets: [
           { type: "본세트 1", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false },
           { type: "본세트 2", weight: weights.pull.rowMain, targetReps: 9, isWarmup: false },
@@ -365,7 +365,7 @@ function getRoutines() {
         id: "cs_row",
         name: "3. 체스트 서포티드 DB 로우 (요추 부담 0%)",
         part: "등(상부)",
-        desc: "인클라인 벤치 흉골 지지, 양손 각 21kg 세팅, 견갑골 완전 후인",
+        desc: "익스트림 그립 1초 컷 세팅, 인클라인 벤치 흉골 지지, 양손 각 21kg, 견갑 완전 후인",
         sets: [
           { type: "본세트 1", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
           { type: "본세트 2", weight: weights.pull.csRow, targetReps: 12, isWarmup: false, desc: `양손 각 ${weights.pull.csRow/2}kg` },
@@ -387,17 +387,18 @@ function getRoutines() {
     legs: [
       {
         id: "squat",
-        name: "1. 백 스쿼트 (뒤꿈치 1.25kg 원판 거치)",
+        name: "1. 백 스쿼트 (10mm 레버 벨트 + 뒤꿈치 원판)",
         part: "하체(사두/둔근)",
-        desc: "안전바 필수! 뒤꿈치 원판 거치, 140kg(최종 145kg) 핵심 견인 종목",
+        desc: "안전바 필수! 10mm 레버 벨트 360도 브레이싱 엄수. 120kg 탑세트(3회 타깃, RPE 8.5 이내 통제)",
         sets: [
           { type: "웜업 1", weight: 20, targetReps: 10, isWarmup: true },
           { type: "웜업 2", weight: 60, targetReps: 5, isWarmup: true },
-          { type: "웜업 3", weight: 80, targetReps: 2, isWarmup: true },
+          { type: "웜업 3", weight: 85, targetReps: 3, isWarmup: true },
+          { type: "웜업 4", weight: 105, targetReps: 1, isWarmup: true },
           { type: "Top Set", weight: weights.legs.squatTop, targetReps: squatTargetReps, isWarmup: false },
-          { type: "Back-off 1", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
-          { type: "Back-off 2", weight: weights.legs.squatTop - 12.5, targetReps: 6, isWarmup: false },
-          { type: "Back-off 3", weight: weights.legs.squatTop - 25.0, targetReps: 8, isWarmup: false }
+          { type: "Back-off 1", weight: weights.legs.squatTop - 15.0, targetReps: 5, isWarmup: false },
+          { type: "Back-off 2", weight: weights.legs.squatTop - 15.0, targetReps: 5, isWarmup: false },
+          { type: "Back-off 3", weight: weights.legs.squatTop - 25.0, targetReps: 7, isWarmup: false }
         ]
       },
       {
@@ -638,19 +639,16 @@ function calc() {
     let changed = false;
     let messages = [];
 
-    // RPE + 반복수 결합 스마트 판정 함수
     function handleProgression(key, category, propName, res, label) {
       const rule = TARGET_MAP[key];
       const curW = weights[category][propName];
 
-      // 피로도 과다 (RPE 9.0 이상) 시 안전 우선 동결
       if (userRpe >= 9.0) {
         messages.push(`${label} ${curW}kg 유지 (체감 피로도 RPE ${userRpe}로 증량 보류 및 궤적 안정화)`);
         return;
       }
 
       if (curW < rule.goal) {
-        // 목표 전: 완수 및 RPE 8.0 이하일 때만 증량
         if (res.success && userRpe <= 8.0) {
           weights[category][propName] += rule.step;
           changed = true;
@@ -661,7 +659,6 @@ function calc() {
           messages.push(`${label} ${curW}kg 유지 (반복수 클린 완수 후 재도전)`);
         }
       } else {
-        // 목표치 도달 후: 5회 완수 + RPE 8.5 이하 시 관문 돌파
         if (res.topReps >= 5 && res.success && userRpe <= 8.5) {
           weights[category][propName] += rule.step;
           changed = true;

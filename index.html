@@ -3,231 +3,641 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0c10">
+  <meta name="theme-color" content="#07090e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>HOMEGYM 4-SPLIT & ARMS TRACKER</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
     :root {
-      --bg: #090b10;
-      --card-bg: rgba(22, 27, 34, 0.7);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --box-bg: rgba(255, 255, 255, 0.04);
-      --box-border: rgba(255, 255, 255, 0.06);
-      --text-main: #f0f6fc;
-      --text-muted: #8b949e;
-      --accent-blue: #38bdf8;
+      --bg: #07090e;
+      --surface-1: rgba(18, 22, 34, 0.75);
+      --surface-2: rgba(28, 35, 52, 0.55);
+      --surface-border: rgba(255, 255, 255, 0.09);
+      --surface-border-hover: rgba(255, 255, 255, 0.18);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
       --accent-purple: #a855f7;
       --accent-green: #10b981;
       --accent-amber: #f59e0b;
-      --accent-red: #f43f5e;
-      --gradient-push: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
-      --gradient-legs: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      --gradient-delts: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-      --gradient-pull: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      --gradient-arms: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      --accent-rose: #f43f5e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text-main); padding: 16px 14px 130px 14px; max-width: 640px; margin: 0 auto; line-height: 1.5; background-image: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 40%); min-height: 100vh; }
-
-    /* Header */
-    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid var(--card-border); }
-    .brand-tag { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 2px; }
-    .title { font-size: 1.25rem; font-weight: 900; letter-spacing: -0.02em; color: #fff; }
-    .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-
-    .header-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-    .cycle-pill { background: rgba(56, 189, 248, 0.12); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; box-shadow: 0 0 12px rgba(56, 189, 248, 0.15); }
-    .btn-group-mini { display: flex; gap: 4px; }
-    .btn-mini { background: var(--box-bg); border: 1px solid var(--box-border); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 600; cursor: pointer; transition: 0.2s; backdrop-filter: blur(8px); }
-    .btn-mini:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
-
-    /* Day Tabs */
-    .day-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 18px; }
-    .tab-btn { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 4px; text-align: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(12px); }
-    .tab-btn .tab-badge { font-size: 0.64rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 2px; }
-    .tab-btn .tab-name { font-size: 0.82rem; font-weight: 800; color: #fff; }
     
-    .tab-btn.active[data-day="duty"] { border-color: var(--accent-purple); box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25); background: linear-gradient(180deg, rgba(168, 85, 247, 0.15) 0%, rgba(22, 27, 34, 0.8) 100%); }
-    .tab-btn.active[data-day="duty"] .tab-name { color: #d8b4fe; }
-    .tab-btn.active[data-day="d1"] { border-color: var(--accent-blue); box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25); background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, rgba(22, 27, 34, 0.8) 100%); }
-    .tab-btn.active[data-day="d1"] .tab-name { color: var(--accent-blue); }
-    .tab-btn.active[data-day="d2"] { border-color: var(--accent-green); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25); background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(22, 27, 34, 0.8) 100%); }
-    .tab-btn.active[data-day="d2"] .tab-name { color: var(--accent-green); }
-    .tab-btn.active[data-day="d3"] { border-color: var(--accent-amber); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25); background: linear-gradient(180deg, rgba(245, 158, 11, 0.15) 0%, rgba(22, 27, 34, 0.8) 100%); }
-    .tab-btn.active[data-day="d3"] .tab-name { color: var(--accent-amber); }
-    .tab-btn.active[data-day="d4"] { border-color: var(--accent-red); box-shadow: 0 4px 20px rgba(244, 63, 94, 0.25); background: linear-gradient(180deg, rgba(244, 63, 94, 0.15) 0%, rgba(22, 27, 34, 0.8) 100%); }
-    .tab-btn.active[data-day="d4"] .tab-name { color: var(--accent-red); }
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0px, transparent 60%);
+      color: var(--text-main);
+      padding: 16px 14px 130px 14px;
+      max-width: 640px;
+      margin: 0 auto;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
 
-    /* Exercise Card */
-    .ex-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; margin-bottom: 14px; backdrop-filter: blur(14px); position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s; }
-    .ex-card::before { content: ""; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: rgba(255,255,255,0.1); }
-    .ex-card.done-card { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.03); }
-    .ex-card.done-card::before { background: var(--accent-green); }
+    /* 상단 헤더 */
+    .header-card {
+      background: var(--surface-1);
+      border: 1px solid var(--surface-border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+    .brand-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 3px;
+    }
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .header-sub {
+      font-size: 0.74rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+    .cycle-badge {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-align: right;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+    }
+    .header-controls {
+      display: flex;
+      gap: 5px;
+      margin-top: 6px;
+      justify-content: flex-end;
+    }
+    .control-pill {
+      background: var(--surface-2);
+      border: 1px solid var(--surface-border);
+      color: var(--text-sub);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .control-pill:hover {
+      color: #fff;
+      border-color: var(--surface-border-hover);
+    }
 
-    .ex-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-    .ex-title { font-size: 1rem; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
-    .badge-wrap { display: flex; gap: 4px; flex-wrap: wrap; }
-    .badge { font-size: 0.68rem; padding: 3px 7px; border-radius: 5px; font-weight: 700; white-space: nowrap; }
-    .badge-rest { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-myo { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
+    /* 5분할 네비게이션 탭 */
+    .tab-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .tab-item {
+      background: var(--surface-1);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(12px);
+    }
+    .tab-badge {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 2px;
+      letter-spacing: -0.01em;
+    }
+    .tab-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-sub);
+    }
 
-    .ex-target { font-size: 0.88rem; font-weight: 800; color: var(--accent-blue); margin-bottom: 6px; }
-    .ex-plate-info { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; color: #34d399; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 8px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; }
-    .ex-plate-info::before { content: "⚙️"; font-size: 0.7rem; }
-    .ex-note { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; }
+    .tab-item.active {
+      transform: translateY(-2px);
+    }
+    .tab-item.active[data-day="duty"] {
+      border-color: var(--accent-purple);
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.2) 0%, rgba(18, 22, 34, 0.9) 100%);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3);
+    }
+    .tab-item.active[data-day="duty"] .tab-title { color: #d8b4fe; }
+    
+    .tab-item.active[data-day="d1"] {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.2) 0%, rgba(18, 22, 34, 0.9) 100%);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.3);
+    }
+    .tab-item.active[data-day="d1"] .tab-title { color: var(--accent-cyan); }
 
-    /* Set Buttons Grid */
-    .set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
-    .set-btn { background: var(--box-bg); border: 1px solid var(--box-border); border-radius: 8px; padding: 10px 4px; text-align: center; cursor: pointer; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; }
-    .set-btn:active { transform: scale(0.96); }
-    .set-btn-label { font-size: 0.78rem; font-weight: 800; color: #e2e8f0; display: block; }
-    .set-btn-sub { font-size: 0.66rem; font-weight: 600; color: var(--text-muted); margin-top: 2px; display: block; }
+    .tab-item.active[data-day="d2"] {
+      border-color: var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.2) 0%, rgba(18, 22, 34, 0.9) 100%);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    }
+    .tab-item.active[data-day="d2"] .tab-title { color: var(--accent-green); }
 
-    .set-btn.myo-style { border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.06); }
-    .set-btn.myo-style .set-btn-label { color: #e9d5ff; }
+    .tab-item.active[data-day="d3"] {
+      border-color: var(--accent-amber);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.2) 0%, rgba(18, 22, 34, 0.9) 100%);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+    }
+    .tab-item.active[data-day="d3"] .tab-title { color: var(--accent-amber); }
 
-    .set-btn.completed { background: var(--accent-green); border-color: var(--accent-green); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-    .set-btn.completed .set-btn-label { color: #022c22; }
-    .set-btn.completed .set-btn-sub { color: rgba(2, 44, 34, 0.85); font-weight: 700; }
+    .tab-item.active[data-day="d4"] {
+      border-color: var(--accent-rose);
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.2) 0%, rgba(18, 22, 34, 0.9) 100%);
+      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
+    }
+    .tab-item.active[data-day="d4"] .tab-title { color: var(--accent-rose); }
 
-    /* Finish Section */
-    .finish-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 18px 16px; margin-top: 18px; text-align: center; backdrop-filter: blur(14px); }
-    .progress-bar-wrap { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-bottom: 12px; }
-    .progress-bar { height: 100%; width: 0%; background: var(--gradient-push); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .progress-txt { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; }
+    /* 운동 카드 */
+    .exercise-card {
+      background: var(--surface-1);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .exercise-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .exercise-card.all-completed {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.04);
+    }
+    .exercise-card.all-completed::before {
+      background: var(--accent-green);
+    }
 
-    .btn-finish { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 0.92rem; font-weight: 800; cursor: pointer; background: var(--box-bg); color: var(--text-muted); transition: all 0.2s; }
-    .btn-finish.ready { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #022c22; font-weight: 900; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
-    .btn-secondary { width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; border: 1px solid var(--box-border); background: transparent; color: var(--text-muted); font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
-    .btn-secondary:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .exercise-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .tag-cluster {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .badge-pill {
+      font-size: 0.68rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-rest {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: var(--accent-amber);
+    }
+    .badge-myo {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+    }
+    .badge-top {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+    }
 
-    /* Accordion Guide */
-    details { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 16px; margin-top: 14px; backdrop-filter: blur(12px); }
-    summary { font-size: 0.84rem; font-weight: 800; cursor: pointer; color: #e2e8f0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-    summary::after { content: "＋"; font-size: 0.9rem; color: var(--accent-blue); }
-    details[open] summary::after { content: "－"; }
-    .guide-list { margin-top: 12px; font-size: 0.76rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
-    .guide-item { background: rgba(0,0,0,0.25); padding: 8px 10px; border-radius: 6px; border-left: 2px solid var(--accent-blue); line-height: 1.45; }
+    .exercise-target {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 6px;
+    }
+    .exercise-plate {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 4px 9px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .exercise-plate::before {
+      content: "⚙";
+      font-size: 0.75rem;
+    }
+    .exercise-note {
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 7px 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      border-left: 2px solid rgba(255, 255, 255, 0.15);
+    }
 
-    /* Floating Timer Bar */
-    .timer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13, 17, 23, 0.92); border-top: 1px solid rgba(255, 255, 255, 0.12); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; max-width: 640px; margin: 0 auto; z-index: 100; backdrop-filter: blur(20px); box-shadow: 0 -8px 30px rgba(0,0,0,0.7); }
-    .timer-bar.running { border-top-color: var(--accent-amber); }
-    .timer-bar.myo-mode { border-top-color: var(--accent-purple); background: rgba(24, 16, 36, 0.94); }
-    .timer-bar.completed { border-top-color: var(--accent-green); background: rgba(6, 30, 20, 0.94); }
+    /* 세트 그리드 및 버튼 */
+    .set-matrix {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+      gap: 7px;
+    }
+    .set-box {
+      background: var(--surface-2);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 10px 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+    .set-box:active {
+      transform: scale(0.96);
+    }
+    .set-label-main {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      display: block;
+    }
+    .set-label-sub {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: block;
+    }
 
-    .timer-data { display: flex; align-items: center; gap: 12px; }
-    .timer-digits { font-size: 1.7rem; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--accent-amber); min-width: 76px; letter-spacing: -0.02em; }
-    .timer-bar.myo-mode .timer-digits { color: #d8b4fe; }
-    .timer-bar.completed .timer-digits { color: var(--accent-green); }
-    .timer-meta { font-size: 0.75rem; color: var(--text-muted); line-height: 1.25; max-width: 220px; }
-    .timer-meta strong { color: #fff; font-weight: 700; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .set-box.topset-style {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .set-box.topset-style .set-label-main { color: #bae6fd; }
 
-    .timer-actions { display: flex; gap: 4px; }
-    .t-btn { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--box-border); background: var(--box-bg); color: #fff; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: 0.15s; }
-    .t-btn:hover { background: rgba(255,255,255,0.1); }
-    .t-btn.danger { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.4); color: #fca5a5; }
+    .set-box.backoff-style {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .set-box.backoff-style .set-label-main { color: #fde68a; }
 
-    /* Modal */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); display: none; justify-content: center; align-items: center; z-index: 200; padding: 20px; backdrop-filter: blur(8px); }
-    .modal-sheet { background: #161b22; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-    .modal-head { font-size: 1.05rem; font-weight: 900; color: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .modal-body { font-size: 0.82rem; color: var(--text-muted); white-space: pre-line; line-height: 1.55; margin-bottom: 18px; }
-    .modal-foot { display: flex; gap: 8px; justify-content: flex-end; }
+    .set-box.myo-style {
+      border-color: rgba(168, 85, 247, 0.4);
+      background: rgba(168, 85, 247, 0.08);
+    }
+    .set-box.myo-style .set-label-main { color: #e9d5ff; }
+
+    .set-box.done {
+      background: var(--accent-green) !important;
+      border-color: var(--accent-green) !important;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .set-box.done .set-label-main { color: #022c22 !important; }
+    .set-box.done .set-label-sub { color: rgba(2, 44, 34, 0.8) !important; font-weight: 700; }
+
+    /* 완료 및 프로그레스 */
+    .finish-section {
+      background: var(--surface-1);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 18px 16px;
+      margin-top: 18px;
+      text-align: center;
+      backdrop-filter: blur(14px);
+    }
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #06b6d4, #3b82f6);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .progress-stat {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+    }
+
+    .btn-action-primary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .btn-action-primary.ready {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #022c22;
+      font-weight: 900;
+      box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-action-secondary {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--surface-border);
+      background: transparent;
+      color: var(--text-sub);
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-action-secondary:hover {
+      color: #fff;
+      border-color: var(--surface-border-hover);
+    }
+
+    /* 가이드 아코디언 */
+    details {
+      background: var(--surface-1);
+      border: 1px solid var(--surface-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      backdrop-filter: blur(12px);
+    }
+    summary {
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      color: #e2e8f0;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    summary::after {
+      content: "＋";
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+    }
+    details[open] summary::after {
+      content: "－";
+    }
+    .guide-box {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .guide-row {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border-left: 2px solid var(--accent-cyan);
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      line-height: 1.45;
+    }
+
+    /* 플로팅 타이머 독 */
+    .timer-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(11, 15, 25, 0.93);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 11px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 640px;
+      margin: 0 auto;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.8);
+    }
+    .timer-panel.active { border-top-color: var(--accent-amber); }
+    .timer-panel.myo-state { border-top-color: var(--accent-purple); background: rgba(22, 14, 34, 0.95); }
+    .timer-panel.done-state { border-top-color: var(--accent-green); background: rgba(6, 30, 20, 0.95); }
+
+    .timer-display-wrap { display: flex; align-items: center; gap: 12px; }
+    .timer-clock {
+      font-size: 1.7rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent-amber);
+      min-width: 76px;
+      letter-spacing: -0.02em;
+    }
+    .timer-panel.myo-state .timer-clock { color: #d8b4fe; }
+    .timer-panel.done-state .timer-clock { color: var(--accent-green); }
+
+    .timer-info-text {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.25;
+      max-width: 220px;
+    }
+    .timer-info-text strong {
+      color: #fff;
+      font-weight: 700;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timer-btn-cluster { display: flex; gap: 4px; }
+    .btn-t {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-2);
+      color: #fff;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .btn-t:hover { background: rgba(255, 255, 255, 0.12); }
+    .btn-t.danger {
+      background: rgba(244, 63, 94, 0.18);
+      border-color: rgba(244, 63, 94, 0.4);
+      color: #fca5a5;
+    }
+
+    /* 모달 */
+    .modal-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .modal-frame {
+      background: #111624;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 22px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8);
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 900; color: #fff; margin-bottom: 8px; }
+    .modal-body-txt { font-size: 0.82rem; color: var(--text-sub); white-space: pre-line; line-height: 1.55; margin-bottom: 18px; }
+    .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; }
   </style>
 </head>
 <body>
 
-  <header class="top-bar">
+  <header class="header-card">
     <div>
-      <div class="brand-tag">HYPERTROPHY & MYO-REPS</div>
-      <div class="title">HOMEGYM 4-SPLIT & ARMS</div>
-      <div class="sub">3대 420kg 복구 · 저부하 고자극 트래커</div>
+      <div class="brand-eyebrow">HYPERTROPHY & BACK-OFF PRO</div>
+      <div class="header-title">HOMEGYM 4-SPLIT & ARMS</div>
+      <div class="header-sub">3대 420kg 복구 · 탑세트 + 백오프 볼륨 트래커</div>
     </div>
-    <div class="header-actions">
-      <div class="cycle-pill" id="cycleBadge">루틴 사이클 #1</div>
-      <div class="btn-group-mini">
-        <button class="btn-mini" onclick="toggleMicroPlate()" id="microBtn">1.25kg 보유</button>
-        <button class="btn-mini" onclick="promptReset()">초기화</button>
+    <div>
+      <div class="cycle-badge" id="cycleBadge">사이클 #1</div>
+      <div class="header-controls">
+        <button class="control-pill" onclick="toggleMicroPlate()" id="microBtn">1.25kg: 보유</button>
+        <button class="control-pill" onclick="promptReset()">초기화</button>
       </div>
     </div>
   </header>
 
-  <!-- 5 Tabs -->
-  <nav class="day-tabs">
-    <div class="tab-btn" data-day="duty" onclick="selectDay('duty')">
+  <!-- 5분할 네비게이션 -->
+  <nav class="tab-nav">
+    <div class="tab-item" data-day="duty" onclick="selectDay('duty')">
       <span class="tab-badge">24h당직</span>
-      <span class="tab-name">Arms</span>
+      <span class="tab-title">Arms</span>
     </div>
-    <div class="tab-btn active" data-day="d1" onclick="selectDay('d1')">
+    <div class="tab-item active" data-day="d1" onclick="selectDay('d1')">
       <span class="tab-badge">비번 1일</span>
-      <span class="tab-name">밀기</span>
+      <span class="tab-title">밀기</span>
     </div>
-    <div class="tab-btn" data-day="d2" onclick="selectDay('d2')">
+    <div class="tab-item" data-day="d2" onclick="selectDay('d2')">
       <span class="tab-badge">비번 2일</span>
-      <span class="tab-name">하체</span>
+      <span class="tab-title">하체</span>
     </div>
-    <div class="tab-btn" data-day="d3" onclick="selectDay('d3')">
+    <div class="tab-item" data-day="d3" onclick="selectDay('d3')">
       <span class="tab-badge">비번 1일</span>
-      <span class="tab-name">어깨</span>
+      <span class="tab-title">어깨</span>
     </div>
-    <div class="tab-btn" data-day="d4" onclick="selectDay('d4')">
+    <div class="tab-item" data-day="d4" onclick="selectDay('d4')">
       <span class="tab-badge">비번 2일</span>
-      <span class="tab-name">당기기</span>
+      <span class="tab-title">당기기</span>
     </div>
   </nav>
 
   <main id="workoutContainer"></main>
 
-  <section class="finish-card">
-    <div class="progress-bar-wrap">
-      <div class="progress-bar" id="progressBar"></div>
+  <!-- 세션 완료 & 과부하 박스 -->
+  <section class="finish-section">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar"></div>
     </div>
-    <div class="progress-txt" id="progressStatus">진행률: 0 / 0 세트 완료</div>
-    <button class="btn-finish" id="finishBtn" onclick="completeSessionAndOverload()">
+    <div class="progress-stat" id="progressStatus">진행률: 0 / 0 세트 완료</div>
+    <button class="btn-action-primary" id="finishBtn" onclick="completeSessionAndOverload()">
       모든 세트를 완료하면 점진적 과부하가 켜져
     </button>
-    <button class="btn-secondary" onclick="completeWithoutOverload()">
-      오늘은 중량·횟수 유지하고 다음 세션으로 넘어가기
+    <button class="btn-action-secondary" onclick="completeWithoutOverload()">
+      오늘은 중량·횟수 동결하고 다음 세션으로 넘어가기
     </button>
   </section>
 
+  <!-- 세션 가이드 -->
   <details>
-    <summary>오늘의 세션 타이밍 & 영양 수칙</summary>
-    <div class="guide-list" id="dailyGuideList"></div>
+    <summary>오늘의 세션 타이밍 & 영양 수칙 보기</summary>
+    <div class="guide-box" id="dailyGuideList"></div>
   </details>
 
-  <!-- Floating Timer -->
-  <div class="timer-bar" id="timerDock">
-    <div class="timer-data">
-      <div class="timer-digits" id="timerDisplay">00:00</div>
-      <div class="timer-meta" id="timerMeta">
+  <!-- 하단 플로팅 타이머 -->
+  <div class="timer-panel" id="timerDock">
+    <div class="timer-display-wrap">
+      <div class="timer-clock" id="timerDisplay">00:00</div>
+      <div class="timer-info-text" id="timerMeta">
         <strong>세트 대기 중</strong>
-        세트 완료 버튼을 터치하면 타이머 시작
+        세트 완료 터치 시 휴식 타이머 자동 작동
       </div>
     </div>
-    <div class="timer-actions">
-      <button class="t-btn" onclick="adjustTimer(-15)">-15</button>
-      <button class="t-btn" onclick="adjustTimer(15)">+15</button>
-      <button class="t-btn danger" onclick="stopTimer()">정지</button>
+    <div class="timer-btn-cluster">
+      <button class="btn-t" onclick="adjustTimer(-15)">-15</button>
+      <button class="btn-t" onclick="adjustTimer(15)">+15</button>
+      <button class="btn-t danger" onclick="stopTimer()">정지</button>
     </div>
   </div>
 
-  <!-- Custom Modal -->
-  <div class="modal-backdrop" id="modalOverlay">
-    <div class="modal-sheet">
-      <div class="modal-head" id="modalTitle">알림</div>
-      <div class="modal-body" id="modalDesc"></div>
-      <div class="modal-foot" id="modalActions">
-        <button class="t-btn" style="background:var(--accent-blue); color:#022c22; font-weight:800; padding:8px 18px;" onclick="closeModal()">확인</button>
+  <!-- 커스텀 모달 -->
+  <div class="modal-scrim" id="modalOverlay">
+    <div class="modal-frame">
+      <div class="modal-title" id="modalTitle">알림</div>
+      <div class="modal-body-txt" id="modalDesc"></div>
+      <div class="modal-buttons" id="modalActions">
+        <button class="btn-t" style="background:#06b6d4; color:#022c22; font-weight:800; padding:8px 18px;" onclick="closeModal()">확인</button>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'shiftLiftHomeGym4SplitV4_Aesthetic';
+    const STORAGE_KEY = 'shiftLiftHomeGym4SplitV5_BackoffPro';
 
     const defaultData = {
       cycleCount: 1,
@@ -240,11 +650,15 @@
         duty_pushdown_myo: { weight: 20.0, actReps: 12, stepW: 2.5, type: 'myo' },
         duty_hammer_curl: { weight: 10.0, reps: 12, maxReps: 14, stepW: 1.0, type: 'double' },
 
-        // [Day 1: 밀기 - 벤치 마이오 렙스 30분]
-        d1_bench_myo: { weight: 77.5, actReps: 9, stepW: 2.5, type: 'myo' },
+        // [Day 1: 밀기 - 벤치프레스 탑세트 + 백오프(신장성 통제) 복원]
+        d1_bench_combo: { 
+          topW: 82.5, topReps: 5, maxTopReps: 6,
+          backW: 72.5, backReps: 8, maxBackReps: 10,
+          stepW: 2.5, type: 'top_backoff' 
+        },
         d1_incline_db_rp: { weight: 20.0, reps: 8, maxReps: 10, stepW: 2.0, type: 'double' },
-        d1_db_fly: { weight: 10.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
-        d1_side_raise_drop: { weight: 8.0, dropW: 6.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
+        d1_db_fly: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
+        d1_side_raise_drop: { weight: 8.0, dropW: 4.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
 
         // [Day 2: 하체 - 사두 직격 & 요추/전완 보호]
         d2_squat: { weight: 105.0, reps: 3, backoffW: 90.0, backoffReps: 8, stepW: 2.5, type: 'linear_hybrid' },
@@ -279,15 +693,15 @@
       const actions = document.getElementById('modalActions');
       if (confirmCallback) {
         actions.innerHTML = `
-          <button class="t-btn" onclick="closeModal()">취소</button>
-          <button class="t-btn" style="background:var(--accent-red); color:#fff; font-weight:800;" id="modalConfirmBtn">확인</button>
+          <button class="btn-t" onclick="closeModal()">취소</button>
+          <button class="btn-t" style="background:#f43f5e; color:#fff; font-weight:800;" id="modalConfirmBtn">확인</button>
         `;
         document.getElementById('modalConfirmBtn').onclick = () => {
           closeModal();
           confirmCallback();
         };
       } else {
-        actions.innerHTML = `<button class="t-btn" style="background:var(--accent-blue); color:#022c22; font-weight:800; padding:8px 18px;" onclick="closeModal()">확인</button>`;
+        actions.innerHTML = `<button class="btn-t" style="background:#06b6d4; color:#022c22; font-weight:800; padding:8px 18px;" onclick="closeModal()">확인</button>`;
       }
       document.getElementById('modalOverlay').style.display = 'flex';
     }
@@ -301,7 +715,7 @@
       if (barType === 'cable') return `상단 케이블 ${targetW}kg`;
       if (barType === 'body') return `맨몸 (필요 시 파워랙 밴드 보조)`;
 
-      const barW = 20.0;
+      const barW = 20.0; // 15kg 바벨 + 2.5kg 원판 2개 고정 베이스 20kg
       const step = state.hasMicroPlate ? 2.5 : 5.0;
       const actualW = Math.round(targetW / step) * step;
 
@@ -324,7 +738,7 @@
 
       if (day === 'duty') {
         return {
-          gradient: 'var(--gradient-arms)',
+          themeColor: '#a855f7',
           guide: [
             "당직 출근일 Arms (20분): 척추 압박 및 복강 내압(발살바) 0% 유지",
             "템포 3-0-1 통제: 이완 3초, 정지 없이 1초 수축 (치팅 및 반동 엄금)",
@@ -337,13 +751,13 @@
               name: '1. 인클라인 덤벨 컬 (이두 장두 신장)',
               target: `덤벨 각 ${p.duty_incline_curl.weight}kg × ${p.duty_incline_curl.reps}회 × 3세트`,
               plate: calcPlateText(p.duty_incline_curl.weight, 'db'),
-              note: '벤치 60도. 팔꿈치를 뒤에 고정하고 네거티브 3초로 이두근을 길게 찢어줘',
+              note: '벤치 60도 세팅. 팔꿈치를 몸통 뒤에 고정하고 네거티브 3초로 이두근을 길게 찢어줘',
               rest: 60,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.duty_incline_curl.reps}회)`, rest: 60 },
-                { label: `2세트 (${p.duty_incline_curl.reps}회)`, rest: 60 },
-                { label: `3세트 (${p.duty_incline_curl.reps}회)`, rest: 60 }
+                { label: `1세트 (${p.duty_incline_curl.reps}회)`, rest: 60, style: '' },
+                { label: `2세트 (${p.duty_incline_curl.reps}회)`, rest: 60, style: '' },
+                { label: `3세트 (${p.duty_incline_curl.reps}회)`, rest: 60, style: '' }
               ]
             },
             {
@@ -355,10 +769,10 @@
               rest: 15,
               type: 'myo',
               sets: [
-                { label: `활성화 (${p.duty_pushdown_myo.actReps}회)`, rest: 15 },
-                { label: '미니 1 (3회)', rest: 15 },
-                { label: '미니 2 (3회)', rest: 15 },
-                { label: '미니 3 (3회)', rest: 60 }
+                { label: `활성화 (${p.duty_pushdown_myo.actReps}회)`, rest: 15, style: 'myo-style' },
+                { label: '미니 1 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 2 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 3 (3회)', rest: 60, style: 'myo-style' }
               ]
             },
             {
@@ -366,13 +780,13 @@
               name: '3. 시티드 덤벨 해머컬 (상완근·전완)',
               target: `덤벨 각 ${p.duty_hammer_curl.weight}kg × ${p.duty_hammer_curl.reps}회 × 3세트`,
               plate: calcPlateText(p.duty_hammer_curl.weight, 'db'),
-              note: '등받이에 앉아 엄지손가락을 천장으로 올리며 전완과 상완근 자극',
+              note: '등받이에 앉아 엄지손가락을 천장으로 올리며 전완과 상완근 집중 자극',
               rest: 45,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 },
-                { label: `2세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 },
-                { label: `3세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 }
+                { label: `1세트 (${p.duty_hammer_curl.reps}회)`, rest: 45, style: '' },
+                { label: `2세트 (${p.duty_hammer_curl.reps}회)`, rest: 45, style: '' },
+                { label: `3세트 (${p.duty_hammer_curl.reps}회)`, rest: 45, style: '' }
               ]
             }
           ]
@@ -380,30 +794,31 @@
       }
 
       if (day === 'd1') {
-        const bm = p.d1_bench_myo;
+        const bc = p.d1_bench_combo;
         return {
-          gradient: 'var(--gradient-push)',
+          themeColor: '#06b6d4',
           guide: [
             "비번 1일차 밀기 (30분): 1차 수면 후 바나나 1개 + 꿀물 + 미온수 섭취 후 진입",
-            "관절 보호: 100kg 단발성 고중량 대신 77.5kg 네거티브 2초 통제 마이오 렙스 수행",
-            "인클라인 RP: 1차 실패 직전 완수 후 15초 쉬고 3회, 다시 15초 쉬고 2~3회로 1세트 종결"
+            "벤치 탑+백오프 구조: 82.5kg 탑세트로 중량감 확보 후, 72.5kg 백오프로 흉근 신장성 장력 꽉 채우기",
+            "인클라인 RP: 1차 실패 직전 완수 후 15초 쉬고 3회, 다시 15초 쉬고 2~3회로 1세트 종결",
+            "날개뼈 큐: 등을 뒤로 접지 말고, 바지 뒷주머니에 꽂아 넣은(하강) 상태로 명치를 들어 올려 마중 나가기"
           ],
           exercises: [
             {
-              id: 'd1_bench_myo',
-              name: '1. 바벨 벤치프레스 [마이오 렙스 전용]',
-              target: `활성화 ${bm.weight}kg × ${bm.actReps}회 (RPE 8.5) + 미니 3회×3번`,
-              plate: calcPlateText(bm.weight, 'barbell'),
-              note: '견갑 하강 고정. 웜업 후 활성화 9회 마치고 15초 휴식 뒤 3회씩 3번 연속 타격!',
-              rest: 15,
-              type: 'myo',
+              id: 'd1_bench_combo',
+              name: '1. 바벨 벤치프레스 (탑세트 + 백오프 볼륨)',
+              target: `탑세트 ${bc.topW}kg × ${bc.topReps}회 + 백오프 ${bc.backW}kg × ${bc.backReps}회 2세트`,
+              plate: `탑세트: ${calcPlateText(bc.topW, 'barbell')} | 백오프: ${calcPlateText(bc.backW, 'barbell')}`,
+              note: '견갑 하강 고정. 탑세트 82.5kg 깔끔하게 밀고, 백오프 72.5kg는 내릴 때 2초 네거티브 통제로 가슴 찢기!',
+              rest: 120,
+              type: 'top_backoff',
               sets: [
-                { label: '웜업 20kg×10', rest: 60 },
-                { label: '웜업 50kg×5', rest: 75 },
-                { label: `활성화 ${bm.weight}kg×${bm.actReps}`, rest: 15 },
-                { label: '미니 1 (3회)', rest: 15 },
-                { label: '미니 2 (3회)', rest: 15 },
-                { label: '미니 3 (3회)', rest: 90 }
+                { label: '웜업 20kg×10', rest: 60, style: '' },
+                { label: '웜업 50kg×5', rest: 75, style: '' },
+                { label: '웜업 70kg×3', rest: 90, style: '' },
+                { label: `탑세트 ${bc.topW}kg×${bc.topReps}`, rest: 120, style: 'topset-style' },
+                { label: `백오프 1 (${bc.backW}kg×${bc.backReps})`, rest: 90, style: 'backoff-style' },
+                { label: `백오프 2 (${bc.backW}kg×${bc.backReps})`, rest: 90, style: 'backoff-style' }
               ]
             },
             {
@@ -415,9 +830,9 @@
               rest: 15,
               type: 'myo',
               sets: [
-                { label: `1차 (${p.d1_incline_db_rp.reps}회)`, rest: 15 },
-                { label: '2차 (3회)', rest: 15 },
-                { label: '3차 (2~3회)', rest: 75 }
+                { label: `1차 (${p.d1_incline_db_rp.reps}회)`, rest: 15, style: 'myo-style' },
+                { label: '2차 (3회)', rest: 15, style: 'myo-style' },
+                { label: '3차 (2~3회)', rest: 75, style: 'myo-style' }
               ]
             },
             {
@@ -425,13 +840,13 @@
               name: '3. 플랫 덤벨 플라이 (흉근 최대 신장)',
               target: `덤벨 각 ${p.d1_db_fly.weight}kg × ${p.d1_db_fly.reps}회 × 3세트`,
               plate: calcPlateText(p.d1_db_fly.weight, 'db'),
-              note: '하단 1초 정지. 안으로 모으려 애쓰지 말고 가슴을 양옆으로 찢어주는 장력에 집중',
+              note: '하단 1초 정지. 안으로 억지로 모으지 말고 가슴을 양옆으로 찢어주는 장력에 집중',
               rest: 60,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d1_db_fly.reps}회)`, rest: 60 },
-                { label: `2세트 (${p.d1_db_fly.reps}회)`, rest: 60 },
-                { label: `3세트 (${p.d1_db_fly.reps}회)`, rest: 60 }
+                { label: `1세트 (${p.d1_db_fly.reps}회)`, rest: 60, style: '' },
+                { label: `2세트 (${p.d1_db_fly.reps}회)`, rest: 60, style: '' },
+                { label: `3세트 (${p.d1_db_fly.reps}회)`, rest: 60, style: '' }
               ]
             },
             {
@@ -439,13 +854,13 @@
               name: '4. 덤벨 사레레 [기계적 드롭세트]',
               target: `본세트 ${p.d1_side_raise_drop.weight}kg × ${p.d1_side_raise_drop.reps}회 + 드롭 ${p.d1_side_raise_drop.dropW}kg × 8회`,
               plate: `본무게: ${p.d1_side_raise_drop.weight}kg / 드롭: ${p.d1_side_raise_drop.dropW}kg`,
-              note: '12회 끝나자마자 6kg 덤벨로 바꿔 8회 연속 수행 후 45초 휴식',
+              note: '12회 끝나자마자 4kg 덤벨로 바꿔 8회 연속 수행 후 45초 휴식',
               rest: 45,
               type: 'standard',
               sets: [
-                { label: '1라운드 (본+드롭)', rest: 45 },
-                { label: '2라운드 (본+드롭)', rest: 45 },
-                { label: '3라운드 (본+드롭)', rest: 45 }
+                { label: '1라운드 (본+드롭)', rest: 45, style: '' },
+                { label: '2라운드 (본+드롭)', rest: 45, style: '' },
+                { label: '3라운드 (본+드롭)', rest: 45, style: '' }
               ]
             }
           ]
@@ -455,7 +870,7 @@
       if (day === 'd2') {
         const sq = p.d2_squat;
         return {
-          gradient: 'var(--gradient-legs)',
+          themeColor: '#10b981',
           guide: [
             "비번 2일차 하체: 숙면 후 진행. 105kg 탑세트 전후 휴식 150초로 뇌압 안정 확보",
             "전완 피로 해결: 고블릿 스쿼트 대신 스트랩 감은 양손 16kg 덤벨 스쿼트로 사두 고립",
@@ -471,11 +886,11 @@
               rest: 150,
               type: 'standard',
               sets: [
-                { label: '웜업 60kg×5', rest: 90 },
-                { label: '웜업 85kg×3', rest: 120 },
-                { label: `탑세트 (${sq.reps}회)`, rest: 150 },
-                { label: `백오프 (${sq.backoffReps}회)`, rest: 120 },
-                { label: `백오프 (${sq.backoffReps}회)`, rest: 120 }
+                { label: '웜업 60kg×5', rest: 90, style: '' },
+                { label: '웜업 85kg×3', rest: 120, style: '' },
+                { label: `탑세트 (${sq.reps}회)`, rest: 150, style: 'topset-style' },
+                { label: `백오프 1 (${sq.backoffReps}회)`, rest: 120, style: 'backoff-style' },
+                { label: `백오프 2 (${sq.backoffReps}회)`, rest: 120, style: 'backoff-style' }
               ]
             },
             {
@@ -487,9 +902,9 @@
               rest: 90,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d2_rdl.reps}회)`, rest: 90 },
-                { label: `2세트 (${p.d2_rdl.reps}회)`, rest: 90 },
-                { label: `3세트 (${p.d2_rdl.reps}회)`, rest: 90 }
+                { label: `1세트 (${p.d2_rdl.reps}회)`, rest: 90, style: '' },
+                { label: `2세트 (${p.d2_rdl.reps}회)`, rest: 90, style: '' },
+                { label: `3세트 (${p.d2_rdl.reps}회)`, rest: 90, style: '' }
               ]
             },
             {
@@ -501,9 +916,9 @@
               rest: 60,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d2_db_squat.reps}회)`, rest: 60 },
-                { label: `2세트 (${p.d2_db_squat.reps}회)`, rest: 60 },
-                { label: `3세트 (${p.d2_db_squat.reps}회)`, rest: 60 }
+                { label: `1세트 (${p.d2_db_squat.reps}회)`, rest: 60, style: '' },
+                { label: `2세트 (${p.d2_db_squat.reps}회)`, rest: 60, style: '' },
+                { label: `3세트 (${p.d2_db_squat.reps}회)`, rest: 60, style: '' }
               ]
             },
             {
@@ -515,9 +930,9 @@
               rest: 45,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d2_leg_raise.reps}회)`, rest: 45 },
-                { label: `2세트 (${p.d2_leg_raise.reps}회)`, rest: 45 },
-                { label: `3세트 (${p.d2_leg_raise.reps}회)`, rest: 45 }
+                { label: `1세트 (${p.d2_leg_raise.reps}회)`, rest: 45, style: '' },
+                { label: `2세트 (${p.d2_leg_raise.reps}회)`, rest: 45, style: '' },
+                { label: `3세트 (${p.d2_leg_raise.reps}회)`, rest: 45, style: '' }
               ]
             }
           ]
@@ -526,7 +941,7 @@
 
       if (day === 'd3') {
         return {
-          gradient: 'var(--gradient-delts)',
+          themeColor: '#f59e0b',
           guide: [
             "비번 1일차 어깨: 뇌압 스파이크/두통 차단 세션! 스탠딩 OHP 배제",
             "인클라인 75도 시티드: 등받이에 상체를 완전히 지지해 경추 및 요추 하중 0% 유지",
@@ -542,10 +957,10 @@
               rest: 75,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
-                { label: `2세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
-                { label: `3세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
-                { label: `4세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 }
+                { label: `1세트 (${p.d3_seated_db_press.reps}회)`, rest: 75, style: '' },
+                { label: `2세트 (${p.d3_seated_db_press.reps}회)`, rest: 75, style: '' },
+                { label: `3세트 (${p.d3_seated_db_press.reps}회)`, rest: 75, style: '' },
+                { label: `4세트 (${p.d3_seated_db_press.reps}회)`, rest: 75, style: '' }
               ]
             },
             {
@@ -557,9 +972,9 @@
               rest: 60,
               type: 'standard',
               sets: [
-                { label: '1라운드 완수', rest: 60 },
-                { label: '2라운드 완수', rest: 60 },
-                { label: '3라운드 완수', rest: 60 }
+                { label: '1라운드 완수', rest: 60, style: '' },
+                { label: '2라운드 완수', rest: 60, style: '' },
+                { label: '3라운드 완수', rest: 60, style: '' }
               ]
             },
             {
@@ -571,9 +986,9 @@
               rest: 45,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d3_rear_delt.reps}회)`, rest: 45 },
-                { label: `2세트 (${p.d3_rear_delt.reps}회)`, rest: 45 },
-                { label: `3세트 (${p.d3_rear_delt.reps}회)`, rest: 45 }
+                { label: `1세트 (${p.d3_rear_delt.reps}회)`, rest: 45, style: '' },
+                { label: `2세트 (${p.d3_rear_delt.reps}회)`, rest: 45, style: '' },
+                { label: `3세트 (${p.d3_rear_delt.reps}회)`, rest: 45, style: '' }
               ]
             }
           ]
@@ -583,7 +998,7 @@
       if (day === 'd4') {
         const dl = p.d4_deadlift;
         return {
-          gradient: 'var(--gradient-pull)',
+          themeColor: '#f43f5e',
           guide: [
             "비번 2일차 당기기: 어제 허리를 100% 쉬었으므로 최상의 요추 컨디션으로 155kg 데드 진입",
             "스트랩 필수: 악력 피로를 배제하고 광배근에만 집중하기 위해 모든 종목 스트랩 착용",
@@ -599,11 +1014,11 @@
               rest: 180,
               type: 'standard',
               sets: [
-                { label: '웜업 70kg×5', rest: 90 },
-                { label: '웜업 110kg×3', rest: 120 },
-                { label: `탑세트 (${dl.reps}회)`, rest: 180 },
-                { label: `백오프 (${dl.backoffReps}회)`, rest: 120 },
-                { label: `백오프 (${dl.backoffReps}회)`, rest: 120 }
+                { label: '웜업 70kg×5', rest: 90, style: '' },
+                { label: '웜업 110kg×3', rest: 120, style: '' },
+                { label: `탑세트 (${dl.reps}회)`, rest: 180, style: 'topset-style' },
+                { label: `백오프 1 (${dl.backoffReps}회)`, rest: 120, style: 'backoff-style' },
+                { label: `백오프 2 (${dl.backoffReps}회)`, rest: 120, style: 'backoff-style' }
               ]
             },
             {
@@ -615,9 +1030,9 @@
               rest: 90,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.d4_pullup.reps}회)`, rest: 90 },
-                { label: `2세트 (${p.d4_pullup.reps}회)`, rest: 90 },
-                { label: `3세트 (${p.d4_pullup.reps}회)`, rest: 90 }
+                { label: `1세트 (${p.d4_pullup.reps}회)`, rest: 90, style: '' },
+                { label: `2세트 (${p.d4_pullup.reps}회)`, rest: 90, style: '' },
+                { label: `3세트 (${p.d4_pullup.reps}회)`, rest: 90, style: '' }
               ]
             },
             {
@@ -629,10 +1044,10 @@
               rest: 15,
               type: 'myo',
               sets: [
-                { label: `활성화 (${p.d4_chest_db_row_myo.actReps}회)`, rest: 15 },
-                { label: '미니 1 (3회)', rest: 15 },
-                { label: '미니 2 (3회)', rest: 15 },
-                { label: '미니 3 (3회)', rest: 75 }
+                { label: `활성화 (${p.d4_chest_db_row_myo.actReps}회)`, rest: 15, style: 'myo-style' },
+                { label: '미니 1 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 2 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 3 (3회)', rest: 75, style: 'myo-style' }
               ]
             },
             {
@@ -644,10 +1059,10 @@
               rest: 15,
               type: 'myo',
               sets: [
-                { label: `활성화 (${p.d4_arm_pulldown_myo.actReps}회)`, rest: 15 },
-                { label: '미니 1 (3회)', rest: 15 },
-                { label: '미니 2 (3회)', rest: 15 },
-                { label: '미니 3 (3회)', rest: 60 }
+                { label: `활성화 (${p.d4_arm_pulldown_myo.actReps}회)`, rest: 15, style: 'myo-style' },
+                { label: '미니 1 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 2 (3회)', rest: 15, style: 'myo-style' },
+                { label: '미니 3 (3회)', rest: 60, style: 'myo-style' }
               ]
             }
           ]
@@ -656,10 +1071,10 @@
     }
 
     function render() {
-      document.getElementById('cycleBadge').textContent = `루틴 사이클 #${state.cycleCount}`;
+      document.getElementById('cycleBadge').textContent = `사이클 #${state.cycleCount}`;
       document.getElementById('microBtn').textContent = `1.25kg: ${state.hasMicroPlate ? '보유' : '미보유'}`;
 
-      document.querySelectorAll('.tab-btn').forEach(btn => {
+      document.querySelectorAll('.tab-item').forEach(btn => {
         const d = btn.getAttribute('data-day');
         btn.classList.toggle('active', state.currentDay === d);
       });
@@ -682,30 +1097,31 @@
           if (isDone) doneSets++;
           else exAllDone = false;
 
-          const isMyoSet = sObj.rest === 15;
+          const isMyo = sObj.rest === 15;
 
           setsHtml += `
-            <div class="set-btn ${isMyoSet ? 'myo-style' : ''} ${isDone ? 'completed' : ''}" 
-                 onclick="toggleSet('${key}', ${sObj.rest}, '${ex.name}', ${isMyoSet})">
-              <span class="set-btn-label">${isDone ? '✓ 완료' : sObj.label}</span>
-              <span class="set-btn-sub">${isDone ? sObj.label : `${sObj.rest}s 휴식`}</span>
+            <div class="set-box ${sObj.style || ''} ${isDone ? 'done' : ''}" 
+                 onclick="toggleSet('${key}', ${sObj.rest}, '${ex.name}', ${isMyo})">
+              <span class="set-label-main">${isDone ? '✓ 완수' : sObj.label}</span>
+              <span class="set-label-sub">${isDone ? sObj.label : `${sObj.rest}초 휴식`}</span>
             </div>
           `;
         });
 
         html += `
-          <div class="ex-card ${exAllDone ? 'done-card' : ''}">
-            <div class="ex-header">
-              <div class="ex-title">${ex.name}</div>
-              <div class="badge-wrap">
-                ${ex.type === 'myo' ? '<span class="badge badge-myo">Myo-reps</span>' : ''}
-                <span class="badge badge-rest">휴식 ${ex.rest}초</span>
+          <div class="exercise-card ${exAllDone ? 'all-completed' : ''}">
+            <div class="card-top">
+              <div class="exercise-name">${ex.name}</div>
+              <div class="tag-cluster">
+                ${ex.type === 'myo' ? '<span class="badge-pill badge-myo">Myo-reps</span>' : ''}
+                ${ex.type === 'top_backoff' ? '<span class="badge-pill badge-top">Top+Backoff</span>' : ''}
+                <span class="badge-pill badge-rest">휴식 ${ex.rest}s</span>
               </div>
             </div>
-            <div class="ex-target">${ex.target}</div>
-            <div class="ex-plate-info">${ex.plate}</div>
-            <div class="ex-note">${ex.note}</div>
-            <div class="set-grid">${setsHtml}</div>
+            <div class="exercise-target">${ex.target}</div>
+            <div class="exercise-plate">${ex.plate}</div>
+            <div class="exercise-note">${ex.note}</div>
+            <div class="set-matrix">${setsHtml}</div>
           </div>
         `;
       });
@@ -714,19 +1130,19 @@
 
       const pct = totalSets > 0 ? (doneSets / totalSets) * 100 : 0;
       document.getElementById('progressBar').style.width = `${pct}%`;
-      document.getElementById('progressBar').style.background = routine.gradient;
+      document.getElementById('progressBar').style.background = routine.themeColor;
       document.getElementById('progressStatus').textContent = `오늘 진행률: ${doneSets} / ${totalSets} 세트 완료 (${Math.round(pct)}%)`;
 
       const finishBtn = document.getElementById('finishBtn');
       if (doneSets === totalSets && totalSets > 0) {
         finishBtn.classList.add('ready');
-        finishBtn.textContent = "오늘 루틴 완벽 완수! 다음 주기 점진적 과부하 적용하기";
+        finishBtn.textContent = "오늘 루틴 완벽 완수! 다음 주기 점진적 과부하(+증량) 적용하기";
       } else {
         finishBtn.classList.remove('ready');
         finishBtn.textContent = `남은 ${totalSets - doneSets}개 세트를 모두 완료하면 활성화돼`;
       }
 
-      document.getElementById('dailyGuideList').innerHTML = routine.guide.map(g => `<div class="guide-item">${g}</div>`).join('');
+      document.getElementById('dailyGuideList').innerHTML = routine.guide.map(g => `<div class="guide-row">${g}</div>`).join('');
     }
 
     function toggleSet(key, restSec, exName, isMyo) {
@@ -758,13 +1174,23 @@
         const item = p[ex.id];
         if (!item) return;
 
-        if (item.type === 'linear_hybrid') {
+        if (item.type === 'top_backoff') {
+          if (item.topReps < item.maxTopReps) {
+            item.topReps += 1;
+            logs.push(`• ${ex.name}: 탑세트 목표 횟수 +1회 상향 (-> ${item.topReps}회)`);
+          } else {
+            item.topReps = item.maxTopReps - 2;
+            item.topW = parseFloat((item.topW + stepBarbell).toFixed(1));
+            item.backW = parseFloat((item.backW + stepBarbell).toFixed(1));
+            logs.push(`• ${ex.name}: 탑세트 상한 달성! 탑세트 ${item.topW}kg / 백오프 ${item.backW}kg로 +${stepBarbell}kg 증량!`);
+          }
+        } else if (item.type === 'linear_hybrid') {
           item.weight = parseFloat((item.weight + stepBarbell).toFixed(1));
           item.backoffW = parseFloat((item.backoffW + stepBarbell).toFixed(1));
-          logs.push(`• ${ex.name}: 탑세트 ${item.weight}kg / 백오프 ${item.backoffW}kg (+${stepBarbell}kg 증량)`);
+          logs.push(`• ${ex.name}: 탑세트 ${item.weight}kg / 백오프 ${item.backoffW}kg로 +${stepBarbell}kg 증량!`);
         } else if (item.type === 'myo') {
           if (item.weight !== undefined) {
-            const inc = (ex.id.includes('bench')) ? stepBarbell : item.stepW;
+            const inc = item.stepW;
             item.weight = parseFloat((item.weight + inc).toFixed(1));
             logs.push(`• ${ex.name}: 마이오 렙스 완수! 중량 +${inc}kg 증량 (-> ${item.weight}kg)`);
           }
@@ -859,7 +1285,7 @@
       if (timerInterval) clearInterval(timerInterval);
       remainingSec = seconds;
       const dock = document.getElementById('timerDock');
-      dock.className = isMyo ? 'timer-bar myo-mode running' : 'timer-bar running';
+      dock.className = isMyo ? 'timer-panel myo-state active' : 'timer-panel active';
       
       const tagText = isMyo ? '<span style="color:#d8b4fe;">[마이오 15초]</span> ' : '';
       document.getElementById('timerMeta').innerHTML = `<strong>${tagText}${label}</strong>휴식 진행 중...`;
@@ -871,7 +1297,7 @@
         if (remainingSec <= 0) {
           clearInterval(timerInterval);
           timerInterval = null;
-          dock.className = 'timer-bar completed';
+          dock.className = 'timer-panel done-state';
           document.getElementById('timerDisplay').textContent = "GO!";
           document.getElementById('timerMeta').innerHTML = `<strong>휴식 완료!</strong>다음 세트에 즉시 진입해`;
           notifyTimerEnd();
@@ -892,9 +1318,9 @@
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = null;
       remainingSec = 0;
-      document.getElementById('timerDock').className = 'timer-bar';
+      document.getElementById('timerDock').className = 'timer-panel';
       document.getElementById('timerDisplay').textContent = "00:00";
-      document.getElementById('timerMeta').innerHTML = `<strong>세트 대기 중</strong>세트 완료 버튼을 터치하면 타이머 시작`;
+      document.getElementById('timerMeta').innerHTML = `<strong>세트 대기 중</strong>세트 완료 터치 시 휴식 타이머 자동 작동`;
     }
 
     function updateTimerDisplay() {

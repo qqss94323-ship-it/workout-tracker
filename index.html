@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0f1115">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>HOMEGYM 4-SPLIT TRACKER</title>
+  <title>HOMEGYM 4-SPLIT & ARMS TRACKER</title>
   <style>
     :root {
       --bg: #0f1115;
@@ -16,6 +16,7 @@
       --blue: #3b82f6;
       --green: #10b981;
       --amber: #f59e0b;
+      --purple: #8b5cf6;
       --red: #ef4444;
       --border: #2d3340;
     }
@@ -27,31 +28,36 @@
     .sub { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
     .cycle-badge { background: rgba(59, 130, 246, 0.18); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 4px 9px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; display: inline-block; }
 
-    /* 4개 탭 (순수 4분할) */
-    .day-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
-    .tab { padding: 9px 4px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 0.76rem; font-weight: 700; color: var(--muted); cursor: pointer; line-height: 1.25; }
+    /* 5개 탭: 당직 팔 + 4분할 */
+    .day-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 14px; }
+    .tab { padding: 8px 3px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); cursor: pointer; line-height: 1.25; }
     .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .tab.active.duty { background: var(--purple); border-color: var(--purple); }
 
     /* 운동 카드 */
-    .ex-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+    .ex-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; transition: border-color 0.2s; }
     .ex-card.done-card { border-color: rgba(16, 185, 129, 0.5); background: rgba(16, 185, 129, 0.05); }
     .ex-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-    .ex-name { font-size: 0.98rem; font-weight: 700; color: #fff; }
-    .ex-rest-tag { font-size: 0.74rem; padding: 3px 7px; border-radius: 4px; background: var(--box); color: var(--amber); font-weight: 600; white-space: nowrap; }
+    .ex-name { font-size: 0.96rem; font-weight: 700; color: #fff; }
+    .ex-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tag { font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+    .tag-rest { background: var(--box); color: var(--amber); }
+    .tag-myo { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4); }
     .ex-target { font-size: 0.88rem; font-weight: 700; color: #60a5fa; margin-bottom: 5px; }
-    .ex-plate { font-size: 0.76rem; color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 5px 8px; border-radius: 5px; margin-bottom: 8px; display: inline-block; font-weight: 600; }
+    .ex-plate { font-size: 0.75rem; color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 5px 8px; border-radius: 5px; margin-bottom: 8px; display: inline-block; font-weight: 600; }
     .ex-note { font-size: 0.76rem; color: var(--muted); margin-bottom: 10px; }
 
     /* 세트 버튼 그리드 */
     .set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(82px, 1fr)); gap: 7px; }
-    .set-btn { padding: 10px 6px; background: var(--box); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.8rem; font-weight: 700; text-align: center; cursor: pointer; transition: 0.15s; user-select: none; }
+    .set-btn { padding: 9px 5px; background: var(--box); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.78rem; font-weight: 700; text-align: center; cursor: pointer; transition: 0.15s; user-select: none; }
+    .set-btn.myo-btn { border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.1); }
     .set-btn.completed { background: var(--green); border-color: var(--green); color: #052e16; }
-    .set-btn span { display: block; font-size: 0.7rem; font-weight: 500; opacity: 0.85; margin-top: 2px; }
+    .set-btn span { display: block; font-size: 0.68rem; font-weight: 500; opacity: 0.85; margin-top: 2px; }
 
     /* 완료 및 점진적 과부하 박스 */
     .finish-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; text-align: center; margin-top: 14px; }
     .progress-status { font-size: 0.86rem; font-weight: 700; margin-bottom: 10px; color: var(--muted); }
-    .btn-finish { width: 100%; padding: 14px; border-radius: 8px; border: none; font-size: 0.92rem; font-weight: 800; cursor: pointer; background: var(--box); color: var(--muted); transition: 0.2s; }
+    .btn-finish { width: 100%; padding: 13px; border-radius: 8px; border: none; font-size: 0.92rem; font-weight: 800; cursor: pointer; background: var(--box); color: var(--muted); transition: 0.2s; }
     .btn-finish.ready { background: var(--green); color: #052e16; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
 
     details { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
@@ -62,37 +68,47 @@
     /* 하단 고정 타이머 바 */
     .timer-dock { position: fixed; bottom: 0; left: 0; right: 0; background: #14171f; border-top: 2px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; max-width: 660px; margin: 0 auto; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.6); }
     .timer-dock.running { border-top-color: var(--amber); }
+    .timer-dock.myo { border-top-color: var(--purple); background: #1b152b; }
     .timer-dock.finished { border-top-color: var(--green); background: #0c261c; }
     .timer-left { display: flex; align-items: center; gap: 10px; }
     .timer-time { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--amber); min-width: 72px; }
+    .timer-dock.myo .timer-time { color: #c4b5fd; }
     .timer-label { font-size: 0.76rem; color: var(--muted); line-height: 1.25; }
     .timer-controls { display: flex; gap: 5px; }
     .t-btn { padding: 7px 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--box); color: var(--text); font-size: 0.76rem; font-weight: 700; cursor: pointer; }
     .t-btn.stop { background: var(--red); border-color: var(--red); color: #fff; }
+
+    /* 커스텀 모달 */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; max-width: 440px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    .modal-title { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .modal-desc { font-size: 0.82rem; color: var(--muted); white-space: pre-line; line-height: 1.5; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
   </style>
 </head>
 <body>
 
   <header class="top-bar">
     <div>
-      <div class="title">HOMEGYM 4-SPLIT TRACKER</div>
-      <div class="sub">근비대·고밀도 4분할 (밀기 / 하체 / 어깨·팔 / 당기기)</div>
+      <div class="title">HOMEGYM 4-SPLIT & ARMS</div>
+      <div class="sub">근비대·마이오 렙스 & 무통증 자극 중심 루틴</div>
     </div>
     <div style="text-align:right;">
-      <div class="cycle-badge" id="cycleBadge">4분할 사이클 #1</div>
+      <div class="cycle-badge" id="cycleBadge">루틴 사이클 #1</div>
       <div style="margin-top:4px; display:flex; gap:5px; justify-content:flex-end;">
         <button class="t-btn" style="padding:3px 6px; font-size:0.68rem;" onclick="toggleMicroPlate()" id="microBtn">1.25kg원판: 보유</button>
-        <button class="t-btn" style="padding:3px 6px; font-size:0.68rem;" onclick="resetAll()">초기화</button>
+        <button class="t-btn" style="padding:3px 6px; font-size:0.68rem;" onclick="promptReset()">초기화</button>
       </div>
     </div>
   </header>
 
-  <!-- 4개 탭 -->
+  <!-- 5개 탭: 출근일 Arms + 4분할 -->
   <div class="day-tabs">
-    <div class="tab active" id="tab-d1" onclick="selectDay('d1')">Day 1<br><span style="font-size:0.66rem; font-weight:500;">밀기</span></div>
-    <div class="tab" id="tab-d2" onclick="selectDay('d2')">Day 2<br><span style="font-size:0.66rem; font-weight:500;">하체</span></div>
-    <div class="tab" id="tab-d3" onclick="selectDay('d3')">Day 3<br><span style="font-size:0.66rem; font-weight:500;">어깨·팔</span></div>
-    <div class="tab" id="tab-d4" onclick="selectDay('d4')">Day 4<br><span style="font-size:0.66rem; font-weight:500;">당기기</span></div>
+    <div class="tab" id="tab-duty" onclick="selectDay('duty')">출근일<br><span style="font-size:0.64rem; font-weight:500;">Arms</span></div>
+    <div class="tab active" id="tab-d1" onclick="selectDay('d1')">Day 1<br><span style="font-size:0.64rem; font-weight:500;">밀기</span></div>
+    <div class="tab" id="tab-d2" onclick="selectDay('d2')">Day 2<br><span style="font-size:0.64rem; font-weight:500;">하체</span></div>
+    <div class="tab" id="tab-d3" onclick="selectDay('d3')">Day 3<br><span style="font-size:0.64rem; font-weight:500;">어깨</span></div>
+    <div class="tab" id="tab-d4" onclick="selectDay('d4')">Day 4<br><span style="font-size:0.64rem; font-weight:500;">당기기</span></div>
   </div>
 
   <main id="workoutContainer"></main>
@@ -112,6 +128,7 @@
     <div class="simple-list" id="dailyGuideList"></div>
   </details>
 
+  <!-- 하단 고정 타이머 바 -->
   <div class="timer-dock" id="timerDock">
     <div class="timer-left">
       <div class="timer-time" id="timerDisplay">00:00</div>
@@ -124,8 +141,19 @@
     </div>
   </div>
 
+  <!-- 커스텀 모달 UI -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">알림</div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-actions" id="modalActions">
+        <button class="t-btn" style="background:var(--blue); color:#fff; padding:8px 16px;" onclick="closeModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'shiftLiftHomeGym4SplitV2';
+    const STORAGE_KEY = 'shiftLiftHomeGym4SplitV3_Myo';
 
     const defaultData = {
       cycleCount: 1,
@@ -133,32 +161,33 @@
       currentDay: 'd1',
       checkedSets: {},
       progression: {
-        // [Day 1: 밀기 - 가슴/측면/삼두 근비대]
-        d1_bench: { weight: 82.5, reps: 5, maxReps: 6, stepW: 2.5, type: 'double', backoffW: 70.0, backoffReps: 8 },
-        d1_incline_db: { weight: 22.0, reps: 8, maxReps: 10, stepW: 2.0, type: 'double' },
-        d1_db_fly: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
-        d1_side_raise: { weight: 8.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
-        d1_pushdown: { weight: 20.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' },
+        // [출근일: Arms 전담 20분 세션]
+        duty_incline_curl: { weight: 10.0, reps: 10, maxReps: 12, stepW: 1.0, type: 'double' },
+        duty_pushdown_myo: { weight: 20.0, actReps: 12, stepW: 2.5, type: 'myo' },
+        duty_hammer_curl: { weight: 10.0, reps: 12, maxReps: 14, stepW: 1.0, type: 'double' },
 
-        // [Day 2: 하체 - 사두/둔근/햄스트링 근비대]
-        d2_squat: { weight: 120.0, reps: 3, backoffW: 100.0, backoffReps: 8, stepW: 2.5, type: 'linear_hybrid' },
-        d2_goblet: { weight: 32.0, reps: 12, maxReps: 15, stepW: 2.0, type: 'double' },
-        d2_rdl: { weight: 95.0, reps: 8, maxReps: 10, stepW: 2.5, type: 'double' },
-        d2_split_sq: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
-        d2_leg_raise: { weight: 0, reps: 12, maxReps: 15, stepW: 0, type: 'reps_only' },
+        // [Day 1: 밀기 - 벤치 마이오 렙스 30분 세션]
+        d1_bench_myo: { weight: 77.5, actReps: 9, stepW: 2.5, type: 'myo' },
+        d1_incline_db_rp: { weight: 20.0, reps: 8, maxReps: 10, stepW: 2.0, type: 'double' },
+        d1_db_fly: { weight: 10.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
+        d1_side_raise_drop: { weight: 8.0, dropW: 6.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
 
-        // [Day 3: 어깨·팔 입체감]
-        d3_ohp: { weight: 50.0, reps: 5, maxReps: 6, stepW: 2.5, type: 'double', backoffW: 42.5, backoffReps: 8 },
+        // [Day 2: 하체 - 사두 직격 & 요추/전완 보호 세션]
+        d2_squat: { weight: 105.0, reps: 3, backoffW: 90.0, backoffReps: 8, stepW: 2.5, type: 'linear_hybrid' },
+        d2_rdl: { weight: 90.0, reps: 8, maxReps: 10, stepW: 2.5, type: 'double' },
+        d2_db_squat: { weight: 16.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
+        d2_leg_raise: { reps: 12, maxReps: 15, stepW: 0, type: 'reps_only' },
+
+        // [Day 3: 어깨 - 뇌압 안전·입체감 세션 (요추 부하 0%)]
+        d3_seated_db_press: { weight: 16.0, reps: 8, maxReps: 10, stepW: 2.0, type: 'double' },
         d3_ss_delt: { dbW: 6.0, cableW: 15.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
-        d3_ss_arms1: { ezW: 19.0, cgbpW: 35.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
-        d3_ss_arms2: { ezW: 19.0, pushW: 20.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
+        d3_rear_delt: { weight: 8.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
 
-        // [Day 4: 당기기 - 등 너비/두께]
+        // [Day 4: 당기기 - 등 전체 너비/두께]
         d4_deadlift: { weight: 155.0, reps: 2, backoffW: 130.0, backoffReps: 5, stepW: 2.5, type: 'linear_hybrid' },
-        d4_bb_row: { weight: 70.0, reps: 8, maxReps: 10, stepW: 2.5, type: 'double' },
         d4_pullup: { reps: 6, maxReps: 8, stepW: 0, type: 'reps_only' },
-        d4_arm_pulldown: { weight: 20.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' },
-        d4_chest_db_row: { weight: 20.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' }
+        d4_chest_db_row_myo: { weight: 18.0, actReps: 10, stepW: 2.0, type: 'myo' },
+        d4_arm_pulldown_myo: { weight: 20.0, actReps: 12, stepW: 2.5, type: 'myo' }
       }
     };
 
@@ -170,16 +199,39 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
+    function showModal(title, desc, confirmCallback = null) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDesc').textContent = desc;
+      const actions = document.getElementById('modalActions');
+      if (confirmCallback) {
+        actions.innerHTML = `
+          <button class="t-btn" onclick="closeModal()">취소</button>
+          <button class="t-btn" style="background:var(--red); color:#fff;" id="modalConfirmBtn">확인</button>
+        `;
+        document.getElementById('modalConfirmBtn').onclick = () => {
+          closeModal();
+          confirmCallback();
+        };
+      } else {
+        actions.innerHTML = `<button class="t-btn" style="background:var(--blue); color:#fff; padding:8px 16px;" onclick="closeModal()">확인</button>`;
+      }
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
     function calcPlateText(targetW, barType) {
       if (barType === 'db') return `한손 덤벨 ${targetW}kg`;
       if (barType === 'cable') return `상단 케이블 ${targetW}kg`;
-      if (barType === 'body') return `맨몸 수행 (필요 시 밴드)`;
+      if (barType === 'body') return `맨몸 (필요 시 파워랙 밴드 보조)`;
 
-      const barW = barType === 'ez' ? 9.0 : 20.0;
+      const barW = 20.0; // 15kg 바벨 + 2.5kg 원판 2개 고정 베이스
       const step = state.hasMicroPlate ? 2.5 : 5.0;
-      const actualW = barType === 'barbell' ? Math.round(targetW / step) * step : targetW;
+      const actualW = Math.round(targetW / step) * step;
 
-      if (actualW <= barW) return `기본 공봉 ${barW}kg 단독`;
+      if (actualW <= barW) return `기본 베이스 바벨 ${barW}kg 단독`;
       let side = (actualW - barW) / 2;
       const plates = state.hasMicroPlate ? [20, 15, 10, 5, 2.5, 1.25] : [20, 15, 10, 5, 2.5];
       const counts = {};
@@ -190,65 +242,135 @@
         }
       }
       const str = Object.entries(counts).map(([k, v]) => `${k}kg×${v}`).join(' + ');
-      return `한쪽 원판(${barW}kg 바): ${str || '구성 불가'}`;
+      return `한쪽 원판(베이스 20kg 바): ${str || '구성 불가'}`;
     }
 
     function getRoutineForDay(day) {
       const p = state.progression;
 
-      if (day === 'd1') {
-        const b = p.d1_bench;
+      if (day === 'duty') {
         return {
           guide: [
-            "• [비번 1일차 밀기] 10:30~14:30 1차 수면 후 기상 즉시 바나나 80g + 꿀 1t + 미온수",
-            "• [타이밍] 15:00 부스터 섭취 -> 15:35 본운동 시작 (휴식 45~90초로 세션 압축)",
-            "• [가동범위] 벤치프레스는 명치 하단 가볍게 터치 후 밀기 (어깨 찝힘 방지 외회전 큐)"
+            "• [당직 근무일 Arms 20분] 척추·요추 압박 및 복강 내압(발살바) 0% 유지",
+            "• [템포] 3-0-1 통제 (이완 3초, 수축 1초 / 반동 엄금)",
+            "• [푸쉬다운 마이오 렙스] 활성화 세트 후 15초(호흡 5회)만 쉬고 3회씩 3번 연속 타격",
+            "• [야간 단식] 22:00 이후 정제 탄수화물(라면류) 0g 엄수, 미온수 2.5L 충분히 섭취"
           ],
           exercises: [
             {
-              id: 'd1_bench',
-              name: '1. 바벨 벤치프레스 (가슴 터치 Full ROM)',
-              target: `탑세트 ${b.weight}kg × ${b.reps}회 + 백오프 ${b.backoffW}kg × ${b.backoffReps}회 2세트`,
-              plate: `탑세트: ${calcPlateText(b.weight, 'barbell')} | 백오프: ${calcPlateText(b.backoffW, 'barbell')}`,
-              note: '견갑 하강 고정, 가슴 하단 터치. 백오프는 네거티브 2초 통제로 흉근 신장 집중',
-              rest: 90,
-              sets: ['웜업 50kg×5', '웜업 70kg×3', `탑세트 (${b.reps}회)`, `백오프 (${b.backoffReps}회)`, `백오프 (${b.backoffReps}회)`]
+              id: 'duty_incline_curl',
+              name: '1. 인클라인 덤벨 컬 (이두 장두 신장)',
+              target: `덤벨 각 ${p.duty_incline_curl.weight}kg × ${p.duty_incline_curl.reps}회 × 3세트`,
+              plate: calcPlateText(p.duty_incline_curl.weight, 'db'),
+              note: '벤치 60도 세팅. 팔꿈치를 몸통 뒤에 고정하고 네거티브 3초 통제',
+              rest: 60,
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.duty_incline_curl.reps}회)`, rest: 60 },
+                { label: `2세트 (${p.duty_incline_curl.reps}회)`, rest: 60 },
+                { label: `3세트 (${p.duty_incline_curl.reps}회)`, rest: 60 }
+              ]
             },
             {
-              id: 'd1_incline_db',
-              name: '2. 인클라인 덤벨 프레스 (윗가슴)',
-              target: `덤벨 각 ${p.d1_incline_db.weight}kg × ${p.d1_incline_db.reps}회 × 3세트`,
-              plate: calcPlateText(p.d1_incline_db.weight, 'db'),
-              note: '벤치 각도 30도. 최하단에서 윗가슴을 강하게 늘려준 뒤 프레스',
-              rest: 75,
-              sets: [`1세트 (${p.d1_incline_db.reps}회)`, `2세트 (${p.d1_incline_db.reps}회)`, `3세트 (${p.d1_incline_db.reps}회)`]
+              id: 'duty_pushdown_myo',
+              name: '2. 케이블 트라이셉스 푸쉬다운 [마이오 렙스]',
+              target: `${p.duty_pushdown_myo.weight}kg × 활성화 ${p.duty_pushdown_myo.actReps}회 + 미니 3회×3번`,
+              plate: calcPlateText(p.duty_pushdown_myo.weight, 'cable'),
+              note: '활성화 후 15초 마이크로 휴식(심호흡 5회) 후 3회씩 끊어 치며 외측두 완전 펌핑',
+              rest: 15,
+              type: 'myo',
+              sets: [
+                { label: `활성화 (${p.duty_pushdown_myo.actReps}회)`, rest: 15 },
+                { label: '미니 1 (3회)', rest: 15 },
+                { label: '미니 2 (3회)', rest: 15 },
+                { label: '미니 3 (3회)', rest: 60 }
+              ]
+            },
+            {
+              id: 'duty_hammer_curl',
+              name: '3. 시티드 덤벨 해머컬 (상완근·전완)',
+              target: `덤벨 각 ${p.duty_hammer_curl.weight}kg × ${p.duty_hammer_curl.reps}회 × 3세트`,
+              plate: calcPlateText(p.duty_hammer_curl.weight, 'db'),
+              note: '벤치에 바르게 앉아 치팅 없이 엄지손가락을 천장 방향으로 리프팅',
+              rest: 45,
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 },
+                { label: `2세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 },
+                { label: `3세트 (${p.duty_hammer_curl.reps}회)`, rest: 45 }
+              ]
+            }
+          ]
+        };
+      }
+
+      if (day === 'd1') {
+        const bm = p.d1_bench_myo;
+        return {
+          guide: [
+            "• [비번 1일차 밀기] 1차 수면 후 기상 즉시 바나나 1개 + 꿀물 + 미온수 섭취",
+            "• [관절 보호] 100kg 단발성 고중량 배제! 77.5kg 네거티브 2초 통제 및 마이오 렙스로 가슴 근비대 집중",
+            "• [인클라인 덤벨 RP] 8회 완수 직후 15초 쉬고 3회, 다시 15초 쉬고 2~3회로 1세트 종결 (세션 25분 단축)"
+          ],
+          exercises: [
+            {
+              id: 'd1_bench_myo',
+              name: '1. 바벨 벤치프레스 [마이오 렙스 전용]',
+              target: `활성화 ${bm.weight}kg × ${bm.actReps}회 (RPE 8.5) + 미니 3회×3번`,
+              plate: calcPlateText(bm.weight, 'barbell'),
+              note: '웜업 후 활성화 세트 진행. 거치 후 15초만 쉬고 3회씩 3번 연속 수행 (관절 통증 0% 달성)',
+              rest: 15,
+              type: 'myo',
+              sets: [
+                { label: '웜업 20kg×10', rest: 60 },
+                { label: '웜업 50kg×5', rest: 75 },
+                { label: `활성화 ${bm.weight}kg×${bm.actReps}`, rest: 15 },
+                { label: '미니 1 (3회)', rest: 15 },
+                { label: '미니 2 (3회)', rest: 15 },
+                { label: '미니 3 (3회)', rest: 90 }
+              ]
+            },
+            {
+              id: 'd1_incline_db_rp',
+              name: '2. 인클라인 덤벨 프레스 [레스트-포즈]',
+              target: `각 ${p.d1_incline_db_rp.weight}kg × 1차 ${p.d1_incline_db_rp.reps}회 + 2차 3회 + 3차 2회`,
+              plate: calcPlateText(p.d1_incline_db_rp.weight, 'db'),
+              note: '벤치 각도 30도. 1차 실패 직전 완수 후 덤벨 무릎에 얹고 15초 심호흡 뒤 즉시 2차/3차 수행',
+              rest: 15,
+              type: 'myo',
+              sets: [
+                { label: `1차 (${p.d1_incline_db_rp.reps}회)`, rest: 15 },
+                { label: '2차 (3회)', rest: 15 },
+                { label: '3차 (2~3회)', rest: 75 }
+              ]
             },
             {
               id: 'd1_db_fly',
-              name: '3. 플랫 덤벨 플라이',
+              name: '3. 플랫 덤벨 플라이 (가슴 최대 신장)',
               target: `덤벨 각 ${p.d1_db_fly.weight}kg × ${p.d1_db_fly.reps}회 × 3세트`,
               plate: calcPlateText(p.d1_db_fly.weight, 'db'),
-              note: '팔꿈치 살짝 굽혀 고정. 하단 최대 이완 지점에서 1초 정지 후 모으기',
+              note: '팔꿈치 살짝 굽혀 고정. 최하단에서 1초 정지하며 대흉근 바깥쪽 신장성 장력 집중',
               rest: 60,
-              sets: [`1세트 (${p.d1_db_fly.reps}회)`, `2세트 (${p.d1_db_fly.reps}회)`, `3세트 (${p.d1_db_fly.reps}회)`]
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d1_db_fly.reps}회)`, rest: 60 },
+                { label: `2세트 (${p.d1_db_fly.reps}회)`, rest: 60 },
+                { label: `3세트 (${p.d1_db_fly.reps}회)`, rest: 60 }
+              ]
             },
             {
-              id: 'd1_side_raise',
-              name: '4. 덤벨 사이드 레터럴 레이즈',
-              target: `덤벨 각 ${p.d1_side_raise.weight}kg × ${p.d1_side_raise.reps}회 × 4세트`,
-              plate: calcPlateText(p.d1_side_raise.weight, 'db'),
-              note: '어깨 내리고 팔꿈치를 옆으로 던지듯 리프팅 (승모근 개입 배제)',
+              id: 'd1_side_raise_drop',
+              name: '4. 덤벨 사레레 [기계적 드롭세트]',
+              target: `본무게 ${p.d1_side_raise_drop.weight}kg × ${p.d1_side_raise_drop.reps}회 + 드롭 ${p.d1_side_raise_drop.dropW}kg × 8회`,
+              plate: `본세트: 덤벨 ${p.d1_side_raise_drop.weight}kg / 드롭: ${p.d1_side_raise_drop.dropW}kg`,
+              note: '본무게 12회 수행 즉시 쉬지 않고 가벼운 덤벨로 8회 연속 수행 후 45초 휴식',
               rest: 45,
-              sets: [`1세트 (${p.d1_side_raise.reps}회)`, `2세트 (${p.d1_side_raise.reps}회)`, `3세트 (${p.d1_side_raise.reps}회)`, `4세트 (${p.d1_side_raise.reps}회)`]
-            },
-            {
-              id: 'd1_pushdown',
-              name: '5. 케이블 트라이셉스 푸쉬다운',
-              target: `${p.d1_pushdown.weight}kg × ${p.d1_pushdown.reps}회 × 3세트`,
-              plate: calcPlateText(p.d1_pushdown.weight, 'cable'),
-              note: '팔꿈치 옆구리 고정. 끝까지 펴서 삼두 쥐어짜기',
-              rest: 45,
-              sets: [`1세트 (${p.d1_pushdown.reps}회)`, `2세트 (${p.d1_pushdown.reps}회)`, `3세트 (${p.d1_pushdown.reps}회)`]
+              type: 'standard',
+              sets: [
+                { label: '1라운드 (본+드롭)', rest: 45 },
+                { label: '2라운드 (본+드롭)', rest: 45 },
+                { label: '3라운드 (본+드롭)', rest: 45 }
+              ]
             }
           ]
         };
@@ -258,104 +380,123 @@
         const sq = p.d2_squat;
         return {
           guide: [
-            "• [비번 2일차 하체] 8시간 숙면 후 진행. 14:30 부스터 -> 15:00 하체 세션",
-            "• [사두 집중] 스쿼트 백오프와 고블릿 스쿼트는 뒤꿈치 원판을 밟고 대퇴사두근을 완전 고립",
-            "• [휴식 압축] 탑세트 120초, 보조는 60~75초로 대사 스트레스 유도"
+            "• [비번 2일차 하체] 8시간 이상 숙면 후 진행. 스쿼트 전 흉추 및 고관절 웜업 3분 필수",
+            "• [고블릿 스쿼트 대체] 전완이 털리던 고블릿 대신 스트랩을 감고 양손 16kg 덤벨 스쿼트로 사두근만 100% 직격",
+            "• [스쿼트 휴식 복원] 105kg 탑세트 전후 150초, 백오프 120초로 신경계 방전 완벽 차단"
           ],
           exercises: [
             {
               id: 'd2_squat',
-              name: '1. 백 스쿼트 (탑세트 1 + 사두 백오프 2)',
+              name: '1. 백 스쿼트 (탑세트 1 + 백오프 2)',
               target: `탑세트 ${sq.weight}kg × ${sq.reps}회 + 백오프 ${sq.backoffW}kg × ${sq.backoffReps}회 2세트`,
               plate: `탑세트: ${calcPlateText(sq.weight, 'barbell')} | 백오프: ${calcPlateText(sq.backoffW, 'barbell')}`,
-              note: '10mm 벨트 착용. 백오프는 뒤꿈치 원판 밟고 상체 수직 유지하며 사두 타격',
-              rest: 120,
-              sets: ['웜업 60kg×5', '웜업 90kg×3', `탑세트 (${sq.reps}회)`, `백오프 (${sq.backoffReps}회)`, `백오프 (${sq.backoffReps}회)`]
-            },
-            {
-              id: 'd2_goblet',
-              name: '2. 힐 엘리베이티드 덤벨 고블릿 스쿼트',
-              target: `덤벨 ${p.d2_goblet.weight}kg × ${p.d2_goblet.reps}회 × 3세트`,
-              plate: calcPlateText(p.d2_goblet.weight, 'db'),
-              note: '뒤꿈치 원판 밟고 덤벨을 턱 밑에 밀착. 요추 부하 없이 사두근만 집중 타격',
-              rest: 60,
-              sets: [`1세트 (${p.d2_goblet.reps}회)`, `2세트 (${p.d2_goblet.reps}회)`, `3세트 (${p.d2_goblet.reps}회)`]
+              note: '10mm 레버벨트 착용. 무리한 120kg 배제, 105kg에서 깊이와 복압 안정성 유지',
+              rest: 150,
+              type: 'standard',
+              sets: [
+                { label: '웜업 60kg×5', rest: 90 },
+                { label: '웜업 85kg×3', rest: 120 },
+                { label: `탑세트 (${sq.reps}회)`, rest: 150 },
+                { label: `백오프 (${sq.backoffReps}회)`, rest: 120 },
+                { label: `백오프 (${sq.backoffReps}회)`, rest: 120 }
+              ]
             },
             {
               id: 'd2_rdl',
-              name: '3. 바벨 루마니안 데드리프트 (RDL)',
+              name: '2. 바벨 루마니안 데드리프트 (RDL)',
               target: `${p.d2_rdl.weight}kg × ${p.d2_rdl.reps}회 × 3세트`,
               plate: calcPlateText(p.d2_rdl.weight, 'barbell'),
-              note: '골반을 뒤로 빼며 정강이 중간까지 하강. 햄스트링/둔근 최대 신장',
-              rest: 75,
-              sets: [`1세트 (${p.d2_rdl.reps}회)`, `2세트 (${p.d2_rdl.reps}회)`, `3세트 (${p.d2_rdl.reps}회)`]
+              note: '스트랩 착용. 사두근을 쉬게 하고 골반 힌지로 햄스트링/둔근 신장 집중',
+              rest: 90,
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d2_rdl.reps}회)`, rest: 90 },
+                { label: `2세트 (${p.d2_rdl.reps}회)`, rest: 90 },
+                { label: `3세트 (${p.d2_rdl.reps}회)`, rest: 90 }
+              ]
             },
             {
-              id: 'd2_split_sq',
-              name: '4. 불가리안 스플릿 스쿼트',
-              target: `덤벨 각 ${p.d2_split_sq.weight}kg × 양발 각 ${p.d2_split_sq.reps}회 × 2세트`,
-              plate: calcPlateText(p.d2_split_sq.weight, 'db'),
-              note: '앞발 뒤꿈치에 체중 실어 둔근 수축 집중',
+              id: 'd2_db_squat',
+              name: '3. 딥 투 덤벨 스쿼트 [전완 피로 0%]',
+              target: `양손 덤벨 각 ${p.d2_db_squat.weight}kg (스트랩 필수) × ${p.d2_db_squat.reps}회 × 3세트`,
+              plate: `양손 덤벨 각 ${p.d2_db_squat.weight}kg + 뒤꿈치 원판 거상`,
+              note: '스트랩을 감아 팔 힘을 완전히 빼고 몸통 옆에 늘어뜨린 채 뒤꿈치 원판 밟고 사두 고립',
               rest: 60,
-              sets: [`1세트 (양발 ${p.d2_split_sq.reps}회)`, `2세트 (양발 ${p.d2_split_sq.reps}회)`]
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d2_db_squat.reps}회)`, rest: 60 },
+                { label: `2세트 (${p.d2_db_squat.reps}회)`, rest: 60 },
+                { label: `3세트 (${p.d2_db_squat.reps}회)`, rest: 60 }
+              ]
             },
             {
               id: 'd2_leg_raise',
-              name: '5. 파워랙 행잉 레그레이즈',
+              name: '4. 파워랙 행잉 레그레이즈',
               target: `맨몸 × ${p.d2_leg_raise.reps}회 × 3세트`,
-              plate: '철봉 매달리기',
-              note: '골반을 가슴 쪽으로 말아 올리며 하복부 수축',
+              plate: '파워랙 철봉 매달리기',
+              note: '골반을 가슴 쪽으로 말아 올리며 하복부 수축 및 척추 압박 감압',
               rest: 45,
-              sets: [`1세트 (${p.d2_leg_raise.reps}회)`, `2세트 (${p.d2_leg_raise.reps}회)`, `3세트 (${p.d2_leg_raise.reps}회)`]
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d2_leg_raise.reps}회)`, rest: 45 },
+                { label: `2세트 (${p.d2_leg_raise.reps}회)`, rest: 45 },
+                { label: `3세트 (${p.d2_leg_raise.reps}회)`, rest: 45 }
+              ]
             }
           ]
         };
       }
 
       if (day === 'd3') {
-        const o = p.d3_ohp;
         return {
           guide: [
-            "• [비번 1일차 어깨·팔] 요추 피로 0% 세션. 내일 데드리프트 PR을 위해 허리 완벽 보호",
-            "• [슈퍼세트] 종목 간 쉬는 시간 없이 바로 넘어가고 라운드 종료 후 60초 휴식",
-            "• [세팅] CGBP는 바벨 35kg 단독 세팅으로 삼두에 온전한 과부하 전달"
+            "• [비번 1일차 어깨] 뇌압 스파이크/두통 완벽 차단 세션! 스탠딩 OHP 배제",
+            "• [인클라인 75도 시티드] 벤치 등받이에 상체를 완전히 지지하여 경추 및 요추 하중 0% 달성",
+            "• [내일 데드리프트 대비] 척추 기립근 피로도를 0%로 보존하여 내일 155kg 데드 최상 컨디션 확보"
           ],
           exercises: [
             {
-              id: 'd3_ohp',
-              name: '1. 오버헤드 프레스 (OHP)',
-              target: `탑세트 ${o.weight}kg × ${o.reps}회 + 백오프 ${o.backoffW}kg × ${o.backoffReps}회 2세트`,
-              plate: `탑세트: ${calcPlateText(o.weight, 'barbell')} | 백오프: ${calcPlateText(o.backoffW, 'barbell')}`,
-              note: '둔근과 복압 고정. 쇄골에서 정수리 위로 수직 궤적 밀기',
-              rest: 90,
-              sets: ['웜업 30kg×5', `탑세트 (${o.reps}회)`, `백오프 (${o.backoffReps}회)`, `백오프 (${o.backoffReps}회)`]
+              id: 'd3_seated_db_press',
+              name: '1. 인클라인 75도 시티드 덤벨 프레스',
+              target: `덤벨 각 ${p.d3_seated_db_press.weight}kg × ${p.d3_seated_db_press.reps}회 × 4세트`,
+              plate: calcPlateText(p.d3_seated_db_press.weight, 'db'),
+              note: '등받이에 몸통 밀착. 턱을 당기고 자연스러운 궤적으로 프레스 (경추 압박 배제)',
+              rest: 75,
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
+                { label: `2세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
+                { label: `3세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 },
+                { label: `4세트 (${p.d3_seated_db_press.reps}회)`, rest: 75 }
+              ]
             },
             {
               id: 'd3_ss_delt',
-              name: '2. [슈퍼세트 1] 인클라인 기대어 사레레 + 케이블 페이스풀',
+              name: '2. [슈퍼세트] 기대어 사레레 + 케이블 페이스풀',
               target: `사레레 ${p.d3_ss_delt.dbW}kg × ${p.d3_ss_delt.reps}회 + 페이스풀 ${p.d3_ss_delt.cableW}kg × 15회`,
               plate: `덤벨 ${p.d3_ss_delt.dbW}kg + 상단 케이블 ${p.d3_ss_delt.cableW}kg`,
-              note: '벤치 70도에 기대어 측면 사레레 후 즉시 케이블 페이스풀 연결',
+              note: '벤치 70도에 기대어 측면 사레레 후 즉시 상단 케이블 페이스풀 연결',
               rest: 60,
-              sets: ['1라운드 완수', '2라운드 완수', '3라운드 완수']
+              type: 'standard',
+              sets: [
+                { label: '1라운드 완수', rest: 60 },
+                { label: '2라운드 완수', rest: 60 },
+                { label: '3라운드 완수', rest: 60 }
+              ]
             },
             {
-              id: 'd3_ss_arms1',
-              name: '3. [슈퍼세트 2] 리버스컬 + 라잉 익스텐션 + CGBP',
-              target: `이지바 ${p.d3_ss_arms1.ezW}kg × ${p.d3_ss_arms1.reps}회 + 바벨 CGBP ${p.d3_ss_arms1.cgbpW}kg × ${p.d3_ss_arms1.reps}회`,
-              plate: `이지바 ${p.d3_ss_arms1.ezW}kg + 바벨 ${calcPlateText(p.d3_ss_arms1.cgbpW, 'barbell')}`,
-              note: '전완/삼두 3연속 펌핑 후 버튼 터치 -> 60초 휴식',
-              rest: 60,
-              sets: ['1라운드 완수', '2라운드 완수', '3라운드 완수']
-            },
-            {
-              id: 'd3_ss_arms2',
-              name: '4. [슈퍼세트 3] 스탠다드 이지바 컬 + 케이블 푸쉬다운',
-              target: `이지바 ${p.d3_ss_arms2.ezW}kg × ${p.d3_ss_arms2.reps}회 + 케이블 ${p.d3_ss_arms2.pushW}kg × 12회`,
-              plate: `이지바 ${calcPlateText(p.d3_ss_arms2.ezW, 'ez')} + 케이블 ${p.d3_ss_arms2.pushW}kg`,
-              note: '이두근 네거티브 3초 통제 후 케이블로 삼두 외측두 마무리',
+              id: 'd3_rear_delt',
+              name: '3. 덤벨 리어 델트 플라이 (후면 고립)',
+              target: `덤벨 각 ${p.d3_rear_delt.weight}kg × ${p.d3_rear_delt.reps}회 × 3세트`,
+              plate: calcPlateText(p.d3_rear_delt.weight, 'db'),
+              note: '인클라인 벤치 30도에 엎드려 후면 삼각근으로만 호를 그리며 리프팅',
               rest: 45,
-              sets: ['1라운드 완수', '2라운드 완수', '3라운드 완수']
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d3_rear_delt.reps}회)`, rest: 45 },
+                { label: `2세트 (${p.d3_rear_delt.reps}회)`, rest: 45 },
+                { label: `3세트 (${p.d3_rear_delt.reps}회)`, rest: 45 }
+              ]
             }
           ]
         };
@@ -365,55 +506,70 @@
         const dl = p.d4_deadlift;
         return {
           guide: [
-            "• [비번 2일차 당기기] 허리 컨디션 최상 상태에서 15:00 데드리프트 진입",
-            "• [장비] 어제 팔 운동 피로가 있으므로 데드와 로우에는 스트랩 필수 착용",
-            "• [수직 당기기] 풀업을 메인 보조로 넣어 역삼각형 광배근 너비 확장"
+            "• [비번 2일차 당기기] 어제 요추를 100% 쉬었으므로 최상의 허리 컨디션으로 155kg 데드리프트 진입",
+            "• [장비] 악력 분산을 막고 광배근에만 집중하기 위해 모든 당기기 종목 스트랩 필수 착용",
+            "• [마이오 렙스 적용] 덤벨 로우와 암 풀다운은 15초 마이크로 휴식으로 10분 만에 등 입체감 완성"
           ],
           exercises: [
             {
               id: 'd4_deadlift',
-              name: '1. 컨벤셔널 데드리프트 (탑세트 1 + 백오프 2)',
+              name: '1. 컨벤셔널 데드리프트 (메인 스트렝스)',
               target: `탑세트 ${dl.weight}kg × ${dl.reps}회 + 백오프 ${dl.backoffW}kg × ${dl.backoffReps}회 2세트`,
               plate: `탑세트: ${calcPlateText(dl.weight, 'barbell')} | 백오프: ${calcPlateText(dl.backoffW, 'barbell')}`,
-              note: '벨트+스트랩 착용. 완수 시 다음 사이클 탑세트 +2.5kg 자동 상향 (160kg 목표)',
-              rest: 150,
-              sets: ['웜업 80kg×5', '웜업 120kg×3', `탑세트 (${dl.reps}회)`, `백오프 (${dl.backoffReps}회)`, `백오프 (${dl.backoffReps}회)`]
+              note: '10mm 벨트 + 스트랩 착용. 척추 중립 고정, 바닥을 밀어내는 레그프레스 느낌',
+              rest: 180,
+              type: 'standard',
+              sets: [
+                { label: '웜업 70kg×5', rest: 90 },
+                { label: '웜업 110kg×3', rest: 120 },
+                { label: `탑세트 (${dl.reps}회)`, rest: 180 },
+                { label: `백오프 (${dl.backoffReps}회)`, rest: 120 },
+                { label: `백오프 (${dl.backoffReps}회)`, rest: 120 }
+              ]
             },
             {
               id: 'd4_pullup',
-              name: '2. 파워랙 풀업 (광배근 너비)',
-              target: `맨몸(또는 밴드) × ${p.d4_pullup.reps}회 × 3세트 (상한 ${p.d4_pullup.maxReps}회)`,
+              name: '2. 파워랙 풀업 (광배 너비 확장)',
+              target: `맨몸(또는 밴드 보조) × ${p.d4_pullup.reps}회 × 3세트`,
               plate: '파워랙 상단 철봉',
-              note: '가슴을 바에 닿게 든다는 느낌으로 당기며 광배근 하부 수축',
-              rest: 75,
-              sets: [`1세트 (${p.d4_pullup.reps}회)`, `2세트 (${p.d4_pullup.reps}회)`, `3세트 (${p.d4_pullup.reps}회)`]
+              note: '가슴을 바 쪽으로 열어주며 광배근 하부로 당기기',
+              rest: 90,
+              type: 'standard',
+              sets: [
+                { label: `1세트 (${p.d4_pullup.reps}회)`, rest: 90 },
+                { label: `2세트 (${p.d4_pullup.reps}회)`, rest: 90 },
+                { label: `3세트 (${p.d4_pullup.reps}회)`, rest: 90 }
+              ]
             },
             {
-              id: 'd4_bb_row',
-              name: '3. 바벨 벤트오버 로우 (등 전체 두께)',
-              target: `${p.d4_bb_row.weight}kg × ${p.d4_bb_row.reps}회 × 3세트`,
-              plate: calcPlateText(p.d4_bb_row.weight, 'barbell'),
-              note: '상체 45도 숙이고 배꼽 쪽으로 당기며 견갑골 강하게 모으기',
-              rest: 75,
-              sets: [`1세트 (${p.d4_bb_row.reps}회)`, `2세트 (${p.d4_bb_row.reps}회)`, `3세트 (${p.d4_bb_row.reps}회)`]
+              id: 'd4_chest_db_row_myo',
+              name: '3. 체스트 서포티드 덤벨 로우 [마이오 렙스]',
+              target: `각 ${p.d4_chest_db_row_myo.weight}kg × 활성화 ${p.d4_chest_db_row_myo.actReps}회 + 미니 3회×3번`,
+              plate: calcPlateText(p.d4_chest_db_row_myo.weight, 'db'),
+              note: '벤치 30도 가슴 밀착(허리 부담 0%). 활성화 후 15초 쉬고 3회씩 3번 등 상부 쥐어짜기',
+              rest: 15,
+              type: 'myo',
+              sets: [
+                { label: `활성화 (${p.d4_chest_db_row_myo.actReps}회)`, rest: 15 },
+                { label: '미니 1 (3회)', rest: 15 },
+                { label: '미니 2 (3회)', rest: 15 },
+                { label: '미니 3 (3회)', rest: 75 }
+              ]
             },
             {
-              id: 'd4_arm_pulldown',
-              name: '4. 케이블 암 풀다운 (광배 고립)',
-              target: `${p.d4_arm_pulldown.weight}kg × ${p.d4_arm_pulldown.reps}회 × 3세트`,
-              plate: calcPlateText(p.d4_arm_pulldown.weight, 'cable'),
-              note: '팔꿈치 살짝 굽혀 고정하고 허벅지까지 호를 그리며 누르기',
-              rest: 45,
-              sets: [`1세트 (${p.d4_arm_pulldown.reps}회)`, `2세트 (${p.d4_arm_pulldown.reps}회)`, `3세트 (${p.d4_arm_pulldown.reps}회)`]
-            },
-            {
-              id: 'd4_chest_db_row',
-              name: '5. 인클라인 벤치 체스트 서포티드 덤벨 로우',
-              target: `덤벨 각 ${p.d4_chest_db_row.weight}kg × ${p.d4_chest_db_row.reps}회 × 3세트`,
-              plate: calcPlateText(p.d4_chest_db_row.weight, 'db'),
-              note: '벤치 30도에 가슴 대고 당기기. 허리 부담 0%로 등 상부 쥐어짜기',
-              rest: 60,
-              sets: [`1세트 (${p.d4_chest_db_row.reps}회)`, `2세트 (${p.d4_chest_db_row.reps}회)`, `3세트 (${p.d4_chest_db_row.reps}회)`]
+              id: 'd4_arm_pulldown_myo',
+              name: '4. 케이블 암 풀다운 [마이오 렙스]',
+              target: `${p.d4_arm_pulldown_myo.weight}kg × 활성화 ${p.d4_arm_pulldown_myo.actReps}회 + 미니 3회×3번`,
+              plate: calcPlateText(p.d4_arm_pulldown_myo.weight, 'cable'),
+              note: '팔꿈치 살짝 굽혀 고정하고 허벅지까지 호를 그리며 광배근 단독 수축',
+              rest: 15,
+              type: 'myo',
+              sets: [
+                { label: `활성화 (${p.d4_arm_pulldown_myo.actReps}회)`, rest: 15 },
+                { label: '미니 1 (3회)', rest: 15 },
+                { label: '미니 2 (3회)', rest: 15 },
+                { label: '미니 3 (3회)', rest: 60 }
+              ]
             }
           ]
         };
@@ -421,12 +577,15 @@
     }
 
     function render() {
-      document.getElementById('cycleBadge').textContent = `4분할 사이클 #${state.cycleCount}`;
+      document.getElementById('cycleBadge').textContent = `루틴 사이클 #${state.cycleCount}`;
       document.getElementById('microBtn').textContent = `1.25kg원판: ${state.hasMicroPlate ? '보유' : '없음(5kg단위)'}`;
 
-      ['d1', 'd2', 'd3', 'd4'].forEach(d => {
+      ['duty', 'd1', 'd2', 'd3', 'd4'].forEach(d => {
         const el = document.getElementById(`tab-${d}`);
-        if (el) el.classList.toggle('active', state.currentDay === d);
+        if (el) {
+          el.classList.toggle('active', state.currentDay === d);
+          if (d === 'duty') el.classList.toggle('duty', state.currentDay === 'duty');
+        }
       });
 
       const routine = getRoutineForDay(state.currentDay);
@@ -440,17 +599,20 @@
         let exAllDone = true;
         let setsHtml = '';
 
-        ex.sets.forEach((setLabel, sIdx) => {
+        ex.sets.forEach((sObj, sIdx) => {
           totalSets++;
           const key = `${state.currentDay}_${ex.id}_s${sIdx}`;
           const isDone = !!state.checkedSets[key];
           if (isDone) doneSets++;
           else exAllDone = false;
 
+          const isMyoSet = sObj.rest === 15;
+
           setsHtml += `
-            <div class="set-btn ${isDone ? 'completed' : ''}" onclick="toggleSet('${key}', ${ex.rest}, '${ex.name}')">
-              ${isDone ? '✓ 완료' : setLabel}
-              <span>${isDone ? setLabel : `터치 시 ${ex.rest}초 휴식`}</span>
+            <div class="set-btn ${isMyoSet ? 'myo-btn' : ''} ${isDone ? 'completed' : ''}" 
+                 onclick="toggleSet('${key}', ${sObj.rest}, '${ex.name}', ${isMyoSet})">
+              ${isDone ? '✓ 완료' : sObj.label}
+              <span>${isDone ? sObj.label : `${sObj.rest}초 휴식`}</span>
             </div>
           `;
         });
@@ -459,7 +621,10 @@
           <div class="ex-card ${exAllDone ? 'done-card' : ''}">
             <div class="ex-header">
               <div class="ex-name">${ex.name}</div>
-              <div class="ex-rest-tag">휴식 ${ex.rest}초</div>
+              <div class="ex-tags">
+                ${ex.type === 'myo' ? '<div class="tag tag-myo">Myo-reps</div>' : ''}
+                <div class="tag tag-rest">세트 간 ${ex.rest}초</div>
+              </div>
             </div>
             <div class="ex-target">${ex.target}</div>
             <div class="ex-plate">${ex.plate}</div>
@@ -486,12 +651,12 @@
       document.getElementById('dailyGuideList').innerHTML = routine.guide.map(g => `<div>${g}</div>`).join('');
     }
 
-    function toggleSet(key, restSec, exName) {
+    function toggleSet(key, restSec, exName, isMyo) {
       state.checkedSets[key] = !state.checkedSets[key];
       save();
       render();
       if (state.checkedSets[key]) {
-        startRestTimer(restSec, exName);
+        startRestTimer(restSec, exName, isMyo);
       }
     }
 
@@ -503,7 +668,7 @@
       }, 0);
 
       if (doneSets < totalSets) {
-        alert("아직 체크하지 않은 세트가 남아 있습니다.");
+        showModal("세트 미완료", "아직 체크하지 않은 세트가 남아 있어. 모든 세트를 완료해야 점진적 과부하가 적용돼!");
         return;
       }
 
@@ -519,27 +684,28 @@
           item.weight = parseFloat((item.weight + stepBarbell).toFixed(1));
           item.backoffW = parseFloat((item.backoffW + stepBarbell).toFixed(1));
           logs.push(`• ${ex.name}: 탑세트 ${item.weight}kg / 백오프 ${item.backoffW}kg로 +${stepBarbell}kg 증량!`);
+        } else if (item.type === 'myo') {
+          if (item.weight !== undefined) {
+            const inc = (ex.id.includes('bench')) ? stepBarbell : item.stepW;
+            item.weight = parseFloat((item.weight + inc).toFixed(1));
+            logs.push(`• ${ex.name}: 마이오 렙스 완수! 중량 +${inc}kg 증량 (-> ${item.weight}kg)`);
+          }
         } else if (item.type === 'double') {
           if (item.reps < item.maxReps) {
             item.reps += 1;
-            logs.push(`• ${ex.name}: 목표 횟수 +1회 증량 (-> ${item.reps}회)`);
+            logs.push(`• ${ex.name}: 목표 횟수 +1회 상향 (-> ${item.reps}회)`);
           } else {
             item.reps = item.maxReps - 2;
-            if (item.ezW !== undefined && item.cgbpW !== undefined) {
-              item.ezW = parseFloat((item.ezW + 2.5).toFixed(1));
-              item.cgbpW = parseFloat((item.cgbpW + stepBarbell).toFixed(1));
-              logs.push(`• ${ex.name}: 상한 달성! 이지바 ${item.ezW}kg / CGBP ${item.cgbpW}kg로 증량`);
-            } else if (item.ezW !== undefined && item.pushW !== undefined) {
-              item.ezW = parseFloat((item.ezW + 2.5).toFixed(1));
-              item.pushW = parseFloat((item.pushW + 2.5).toFixed(1));
-              logs.push(`• ${ex.name}: 상한 달성! 이지바 ${item.ezW}kg / 푸쉬다운 ${item.pushW}kg로 증량`);
-            } else if (item.dbW !== undefined && item.cableW !== undefined) {
+            if (item.dbW !== undefined && item.cableW !== undefined) {
               item.dbW = parseFloat((item.dbW + 1.0).toFixed(1));
               item.cableW = parseFloat((item.cableW + 2.5).toFixed(1));
-              logs.push(`• ${ex.name}: 상한 달성! 사레레 ${item.dbW}kg / 페이스풀 ${item.cableW}kg로 증량`);
+              logs.push(`• ${ex.name}: 상한 달성! 사레레 ${item.dbW}kg / 페이스풀 ${item.cableW}kg 증량`);
+            } else if (item.dropW !== undefined) {
+              item.weight = parseFloat((item.weight + item.stepW).toFixed(1));
+              item.dropW = parseFloat((item.dropW + item.stepW).toFixed(1));
+              logs.push(`• ${ex.name}: 상한 달성! 본무게 ${item.weight}kg / 드롭 ${item.dropW}kg 증량`);
             } else {
-              const inc = (ex.id.includes('bench') || ex.id.includes('ohp') || ex.id.includes('rdl') || ex.id.includes('bb_row'))
-                ? stepBarbell : item.stepW;
+              const inc = (ex.id.includes('rdl')) ? stepBarbell : item.stepW;
               item.weight = parseFloat((item.weight + inc).toFixed(1));
               logs.push(`• ${ex.name}: 상한 횟수 달성! 중량 +${inc}kg 증량 (-> ${item.weight}kg × ${item.reps}회)`);
             }
@@ -554,8 +720,9 @@
     }
 
     function completeWithoutOverload() {
-      if (!confirm("현재 중량과 횟수를 유지하고 다음 세션으로 넘어가시겠습니까?")) return;
-      advanceToNextDay("• 중량 및 횟수 동결 (다음 사이클에 동일 중량 재도전)");
+      showModal("중량/횟수 동결", "오늘 중량과 횟수를 그대로 유지하고 다음 세션으로 넘어갈까?", () => {
+        advanceToNextDay("• 중량 및 횟수 동결 (다음 사이클에 동일 조건 재도전)");
+      });
     }
 
     function advanceToNextDay(summaryLog) {
@@ -566,11 +733,11 @@
         });
       });
 
-      // 깔끔한 순환 순서: d1 -> d2 -> d3 -> d4 -> d1
-      const order = { 'd1': 'd2', 'd2': 'd3', 'd3': 'd4', 'd4': 'd1' };
+      // 자연스러운 교대 순환: duty(출근) -> d1(밀기) -> d2(하체) -> d3(어깨) -> d4(당기기) -> duty
+      const order = { 'duty': 'd1', 'd1': 'd2', 'd2': 'd3', 'd3': 'd4', 'd4': 'duty' };
       if (state.currentDay === 'd4') {
         state.cycleCount += 1;
-        summaryLog += `\n\n[4분할 1바퀴 완주!] 사이클 #${state.cycleCount}이 시작됩니다.`;
+        summaryLog += `\n\n[루틴 1바퀴 완주!] 사이클 #${state.cycleCount}이 시작됩니다.`;
       }
       state.currentDay = order[state.currentDay] || 'd1';
 
@@ -578,7 +745,7 @@
       save();
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`[세션 완료 및 다음 주기 세팅 내역]\n\n${summaryLog}`);
+      showModal("세션 완료 및 다음 주기 세팅", summaryLog);
     }
 
     function selectDay(day) {
@@ -601,22 +768,24 @@
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.22);
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + idx * 0.22);
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.2);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.2);
           osc.connect(gain);
           gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + idx * 0.22);
-          osc.stop(ctx.currentTime + idx * 0.22 + 0.18);
+          osc.start(ctx.currentTime + idx * 0.2);
+          osc.stop(ctx.currentTime + idx * 0.2 + 0.16);
         });
       } catch (e) {}
     }
 
-    function startRestTimer(seconds, label) {
+    function startRestTimer(seconds, label, isMyo) {
       if (timerInterval) clearInterval(timerInterval);
       remainingSec = seconds;
       const dock = document.getElementById('timerDock');
-      dock.className = 'timer-dock running';
-      document.getElementById('timerStatusText').innerHTML = `<strong>${label}</strong><br>휴식 진행 중...`;
+      dock.className = isMyo ? 'timer-dock myo running' : 'timer-dock running';
+      
+      const tagText = isMyo ? '<span style="color:#c4b5fd;">[마이오 15초]</span> ' : '';
+      document.getElementById('timerStatusText').innerHTML = `<strong>${tagText}${label}</strong><br>휴식 진행 중...`;
       updateTimerDisplay();
 
       timerInterval = setInterval(() => {
@@ -626,8 +795,8 @@
           clearInterval(timerInterval);
           timerInterval = null;
           dock.className = 'timer-dock finished';
-          document.getElementById('timerDisplay').textContent = "START!";
-          document.getElementById('timerStatusText').innerHTML = `<strong>휴식 종료!</strong><br>다음 세트에 들어가세요`;
+          document.getElementById('timerDisplay').textContent = "GO!";
+          document.getElementById('timerStatusText').innerHTML = `<strong>휴식 완료!</strong><br>다음 세트 즉시 진입`;
           notifyTimerEnd();
         }
       }, 1000);
@@ -635,7 +804,7 @@
 
     function adjustTimer(delta) {
       if (!timerInterval && remainingSec <= 0) {
-        if (delta > 0) startRestTimer(delta, '수동 타이머');
+        if (delta > 0) startRestTimer(delta, '수동 타이머', false);
         return;
       }
       remainingSec = Math.max(0, remainingSec + delta);
@@ -657,13 +826,13 @@
       document.getElementById('timerDisplay').textContent = `${m}:${s}`;
     }
 
-    function resetAll() {
-      if (confirm("모든 증량 기록을 초기 베이스라인으로 리셋하시겠습니까?")) {
+    function promptReset() {
+      showModal("전체 데이터 초기화", "모든 증량 기록을 초기 베이스라인으로 완전히 리셋할까?", () => {
         localStorage.removeItem(STORAGE_KEY);
         state = JSON.parse(JSON.stringify(defaultData));
         stopTimer();
         render();
-      }
+      });
     }
 
     render();

@@ -227,11 +227,6 @@
       border: 1px solid rgba(245, 158, 11, 0.35);
       color: var(--accent-amber);
     }
-    .badge-super {
-      background: rgba(168, 85, 247, 0.15);
-      border: 1px solid rgba(168, 85, 247, 0.4);
-      color: #d8b4fe;
-    }
     .badge-top {
       background: rgba(56, 189, 248, 0.15);
       border: 1px solid rgba(56, 189, 248, 0.4);
@@ -382,19 +377,33 @@
     .btn-action-secondary {
       width: 100%;
       margin-top: 8px;
-      padding: 10px;
+      padding: 11px;
       border-radius: 10px;
       border: 1px solid var(--surface-border);
       background: transparent;
       color: var(--text-sub);
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
     .btn-action-secondary:hover {
       color: #fff;
       border-color: var(--surface-border-hover);
+    }
+    .btn-action-copy {
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #38bdf8;
+      background: rgba(6, 182, 212, 0.05);
+    }
+    .btn-action-copy:hover {
+      background: rgba(6, 182, 212, 0.12);
+      border-color: var(--accent-cyan);
+      color: #fff;
     }
 
     details {
@@ -575,9 +584,16 @@
       <div class="progress-fill" id="progressBar"></div>
     </div>
     <div class="progress-stat" id="progressStatus">진행률: 0 / 0 세트 완료</div>
+    
     <button class="btn-action-primary" id="finishBtn" onclick="completeSessionAndOverload()">
       모든 본세트를 완료하면 점진적 과부하가 켜집니다
     </button>
+    
+    <!-- 수행 기록 복사 버튼 -->
+    <button class="btn-action-secondary btn-action-copy" onclick="copyWorkoutLog()">
+      📋 오늘 수행 기록 텍스트 복사하기
+    </button>
+
     <button class="btn-action-secondary" onclick="completeWithoutOverload()">
       오늘은 중량·횟수 동결하고 다음 세션으로 넘어가기
     </button>
@@ -1138,6 +1154,65 @@
       if (state.checkedSets[key]) {
         startRestTimer(restSec, exName);
       }
+    }
+
+    /* 수행 기록 클립보드 복사 함수 */
+    function copyWorkoutLog() {
+      const routine = getRoutineForDay(state.currentDay);
+      const activeTab = document.querySelector('.tab-item.active .tab-title');
+      const sessionTitle = activeTab ? activeTab.textContent : state.currentDay;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+
+      let logText = `[${dateStr} - ${sessionTitle} 수행 기록]\n`;
+      logText += `사이클: #${state.cycleCount} | 1.25kg 원판: ${state.hasMicroPlate ? '보유' : '미보유'}\n\n`;
+
+      let totalLogged = 0;
+      let totalCompleted = 0;
+
+      routine.exercises.forEach(ex => {
+        const completedSets = ex.sets.filter((_, sIdx) => state.checkedSets[`${state.currentDay}_${ex.id}_s${sIdx}`]);
+        totalLogged += ex.sets.length;
+        totalCompleted += completedSets.length;
+
+        logText += `• ${ex.name} (${completedSets.length}/${ex.sets.length} 완수)\n`;
+        logText += `  설정: ${ex.target}\n`;
+
+        ex.sets.forEach((s, sIdx) => {
+          const isDone = !!state.checkedSets[`${state.currentDay}_${ex.id}_s${sIdx}`];
+          logText += `  - 세트 ${sIdx + 1}: ${s.label} [${isDone ? '완수' : '미수행'}]\n`;
+        });
+        logText += '\n';
+      });
+
+      logText += `총 진행도: ${totalCompleted}/${totalLogged} 세트 (${Math.round((totalCompleted / totalLogged) * 100)}%)\n`;
+      logText += `특이사항: Full ROM, 최하단 1초 정지 및 RIR 1~2 준수`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(logText.trim()).then(() => {
+          showModal("복사 완료", "오늘의 운동 수행 기록이 클립보드에 복사되었습니다!\n채팅창에 붙여넣어 피드백을 받아보세요.");
+        }).catch(() => {
+          fallbackCopy(logText);
+        });
+      } else {
+        fallbackCopy(logText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text.trim();
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showModal("복사 완료", "오늘의 운동 수행 기록이 클립보드에 복사되었습니다!\n채팅창에 붙여넣어 피드백을 받아보세요.");
+      } catch (err) {
+        showModal("복사 실패", "클립보드 접근이 제한되었습니다. 텍스트를 직접 복사해주세요:\n\n" + text);
+      }
+      document.body.removeChild(ta);
     }
 
     function completeSessionAndOverload() {

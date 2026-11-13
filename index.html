@@ -589,7 +589,6 @@
       모든 본세트를 완료하면 점진적 과부하가 켜집니다
     </button>
     
-    <!-- 수행 기록 복사 버튼 -->
     <button class="btn-action-secondary btn-action-copy" onclick="copyWorkoutLog()">
       📋 오늘 수행 기록 텍스트 복사하기
     </button>
@@ -632,51 +631,51 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'homegym_4split_science_v2026';
+    const STORAGE_KEY = 'homegym_4split_science_v2026_final';
 
     const defaultData = {
       cycleCount: 1,
       hasMicroPlate: true,
-      currentDay: 's1',
+      currentDay: 's4', // 현재 차례인 하체 세션 기본 활성화
       checkedSets: {},
       progression: {
-        // [Session 1: 상체 Push & 삼두]
+        // [Session 1: 상체 Push & 삼두] - 1사이클 피드백 반영 완료
         s1_low_incline_bench: {
-          topW: 77.5, topReps: 6, maxTopReps: 8,
+          topW: 77.5, topReps: 7, maxTopReps: 8,
           backW: 70.0, backReps: 8, maxBackReps: 10,
           stepW: 2.5, type: 'top_backoff'
         },
-        s1_incline_db_press: { weight: 24.0, reps: 8, maxReps: 10, stepW: 2.0, type: 'double' },
-        s1_lateral_raise: { weight: 5.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
+        s1_incline_db_press: { weight: 24.0, reps: 9, maxReps: 10, stepW: 2.0, type: 'double' },
+        s1_lateral_raise: { weight: 7.0, reps: 12, maxReps: 15, stepW: 1.0, type: 'double' },
         s1_lying_tri_ext: { weight: 25.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
-        s1_cable_pushdown: { weight: 20.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' },
+        s1_cable_pushdown: { weight: 15.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' }, // 라트익 후 피로 고려 15kg 조정
 
-        // [Session 2: 상체 Pull & 이두]
+        // [Session 2: 상체 Pull & 이두] - 10kg 덤벨 부재 반영(베이시안 케이블 컬 교체)
         s2_barbell_row: {
-          topW: 77.5, topReps: 6, maxTopReps: 8,
+          topW: 77.5, topReps: 7, maxTopReps: 8,
           backW: 70.0, backReps: 8, maxBackReps: 10,
           stepW: 2.5, type: 'top_backoff'
         },
         s2_body_pullup: { reps: 8, maxReps: 10, stepW: 0, type: 'reps_only' },
-        s2_one_arm_row: { weight: 28.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
-        s2_cable_facepull: { weight: 15.0, reps: 15, maxReps: 20, stepW: 2.5, type: 'double' },
-        s2_incline_db_curl: { weight: 10.0, reps: 10, maxReps: 12, stepW: 1.0, type: 'double' },
+        s2_one_arm_row: { weight: 28.0, reps: 11, maxReps: 12, stepW: 2.0, type: 'double' },
+        s2_cable_facepull: { weight: 15.0, reps: 16, maxReps: 20, stepW: 2.5, type: 'double' },
+        s2_bayesian_curl: { weight: 10.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
 
-        // [Session 3: 상체 프레임 & 팔 슈퍼세트]
+        // [Session 3: 상체 프레임 & 팔 슈퍼세트] - 1사이클 수행 기록 반영 완료
         s3_ohp: {
-          topW: 47.5, topReps: 6, maxTopReps: 8,
+          topW: 47.5, topReps: 7, maxTopReps: 8,
           backW: 42.5, backReps: 8, maxBackReps: 10,
           stepW: 2.5, type: 'top_backoff'
         },
-        s3_cable_arm_pulldown: { weight: 20.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' },
-        s3_lateral_raise_vol: { weight: 5.0, reps: 15, maxReps: 20, stepW: 1.0, type: 'double' },
-        s3_super_arms: { curlW: 25.0, extW: 15.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'super_arms' },
+        s3_cable_arm_pulldown: { weight: 20.0, reps: 13, maxReps: 15, stepW: 2.5, type: 'double' },
+        s3_lateral_raise_vol: { weight: 7.0, reps: 15, maxReps: 20, stepW: 1.0, type: 'double' },
+        s3_super_arms: { curlW: 25.0, extW: 16.0, reps: 11, maxReps: 12, stepW: 2.5, type: 'super_arms' },
         s3_hammer_curl: { weight: 12.0, reps: 10, maxReps: 12, stepW: 1.0, type: 'double' },
 
-        // [Session 4: 하체 3대 380 방어]
+        // [Session 4: 하체 3대 380 방어] - 덤벨 레그컬 -> 불가리안 스플릿 스쿼트 교체
         s4_squat_str: { weight: 105.0, reps: 5, maxReps: 6, stepW: 2.5, type: 'linear_hybrid' },
         s4_deadlift_str: { weight: 125.0, reps: 5, maxReps: 6, stepW: 5.0, type: 'linear_hybrid' },
-        s4_db_leg_curl: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
+        s4_bulgarian_split: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
         s4_hanging_leg_raise: { reps: 15, maxReps: 20, stepW: 0, type: 'reps_only' }
       }
     };
@@ -745,8 +744,8 @@
           guide: [
             "세션 목표: 상체 전면 프레임 및 삼두 근비대 (70~75분 완결)",
             "바벨 로우 인클라인: 벤치 1칸(약 15도) 세팅. 최하단 쇄골 아래 1초 정지로 반동 완전 제거",
-            "RIR 원칙: 다관절(벤치/덤벨 프레스)은 RIR 1~2 엄수. 삼두/어깨 고립 세트 마지막에서만 한계 도달",
-            "네거티브 통제: 모든 프레스 동작은 2~3초간 이완 장력을 느끼며 통제 하강"
+            "삼두 피로 관리: 라트익 후 사전 소진을 감안해 푸쉬다운은 15kg 내외로 정확한 반복수 완수",
+            "RIR 원칙: 다관절은 RIR 1~2 엄수, 고립 세트 마지막에서만 한계 도달 허용"
           ],
           exercises: [
             {
@@ -782,10 +781,10 @@
             },
             {
               id: 's1_lateral_raise',
-              name: '3. 사이드 레터럴 레이즈 (견갑골 면 거상)',
+              name: '3. 사이드 레터럴 레이즈 (+ 리어델트 슈퍼 가능)',
               target: `덤벨 각 ${p.s1_lateral_raise.weight}kg × ${p.s1_lateral_raise.reps}회 × 3세트`,
               plate: calcPlateText(p.s1_lateral_raise.weight, 'db'),
-              note: '승모근 개입 배제, 팔을 30도 앞(견갑골 면)으로 뻗어 측면 삼각근 고립. 60~75초 짧은 휴식.',
+              note: '승모근 개입 배제, 견갑골 면(30도 앞) 거상. 리어델트 플라이와 묶어서 슈퍼세트 진행 가능.',
               rest: 75,
               type: 'standard',
               sets: [
@@ -813,7 +812,7 @@
               name: '5. 케이블 로프 푸쉬다운 (외측두 락아웃)',
               target: `${p.s1_cable_pushdown.weight}kg × ${p.s1_cable_pushdown.reps}회 × 3세트`,
               plate: calcPlateText(p.s1_cable_pushdown.weight, 'cable'),
-              note: '하단에서 로프를 바깥쪽으로 벌리며 외측두 쥐어짜기. 3세트 마지막만 RIR 0 도달 허용.',
+              note: '라트익 직후 피로를 감안해 15kg 세팅. 하단에서 로프 벌리며 3세트 정자세 완수 집중.',
               rest: 60,
               type: 'standard',
               sets: [
@@ -833,8 +832,8 @@
           guide: [
             "세션 목표: 등 전체 두께/너비 및 이두 장두 신장 (70~75분)",
             "바벨 로우: 상체 45도 숙이고 복압 단단히 고정. 배꼽 쪽으로 당기며 등 하부 및 중부 수축",
-            "스트랩 권장: 전완근 조기 피로를 막고 등과 이두 타깃에 100% 집중",
-            "인클라인 컬: 벤치 60도 세팅, 팔꿈치를 몸 뒤에 고정하고 네거티브 3초 통제"
+            "풀업 보조: 맨몸 정자세 한계 도달 시 다음 세트는 밴드 보조로 Full ROM(데드행→쇄골 터치) 사수",
+            "베이시안 케이블 컬: 10kg 덤벨 부재를 대체하여 케이블 최하단 세팅 후 장두 최대 신장 자극"
           ],
           exercises: [
             {
@@ -857,9 +856,9 @@
             {
               id: 's2_body_pullup',
               name: '2. 체중 풀업 (데드행 → 쇄골 터치)',
-              target: `맨몸 × ${p.s2_body_pullup.reps}회 × 3세트`,
+              target: `맨몸(필요 시 밴드) × ${p.s2_body_pullup.reps}회 × 3세트`,
               plate: calcPlateText(0, 'body'),
-              note: '완전 가동 범위(Full ROM). 하단 데드행에서 견갑 하강 후 가슴을 열며 올라감.',
+              note: '1세트 맨몸 진행 후 2~3세트 반복수 저하 시 밴드 보조 활용하여 가동범위 끝까지 완수.',
               rest: 90,
               type: 'standard',
               sets: [
@@ -896,17 +895,17 @@
               ]
             },
             {
-              id: 's2_incline_db_curl',
-              name: '5. 인클라인 덤벨 컬 (60도 벤치/이두 장두)',
-              target: `덤벨 각 ${p.s2_incline_db_curl.weight}kg × ${p.s2_incline_db_curl.reps}회 × 3세트`,
-              plate: calcPlateText(p.s2_incline_db_curl.weight, 'db'),
-              note: '팔꿈치를 몸 뒤에 고정. 이두근 하단 신장 구간에서 1초 멈춘 뒤 수축.',
+              id: 's2_bayesian_curl',
+              name: '5. 베이시안 케이블 컬 (이두 장두 최대 신장)',
+              target: `케이블 ${p.s2_bayesian_curl.weight}kg × ${p.s2_bayesian_curl.reps}회 × 3세트`,
+              plate: calcPlateText(p.s2_bayesian_curl.weight, 'cable'),
+              note: '최하단 도르래를 등지고 한 걸음 앞 포지션. 팔꿈치를 몸통 뒤에 고정하고 네거티브 3초 통제.',
               rest: 60,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.s2_incline_db_curl.reps}회)`, rest: 60, style: '' },
-                { label: `2세트 (${p.s2_incline_db_curl.reps}회)`, rest: 60, style: '' },
-                { label: `3세트 (${p.s2_incline_db_curl.reps}회)`, rest: 60, style: '' }
+                { label: `1세트 (${p.s2_bayesian_curl.reps}회)`, rest: 60, style: '' },
+                { label: `2세트 (${p.s2_bayesian_curl.reps}회)`, rest: 60, style: '' },
+                { label: `3세트 (${p.s2_bayesian_curl.reps}회)`, rest: 60, style: '' }
               ]
             }
           ]
@@ -922,7 +921,7 @@
             "세션 목표: 어깨 프레임 입체감 & 팔 슈퍼세트 집중 타격 (70분)",
             "OHP: 코어와 둔근을 단단히 조이고 수직 궤적으로 프레스. 쇄골 최하단 1초 정지 후 폭발",
             "팔 슈퍼세트: 바이셉스 컬 직후 쉬지 않고 오버헤드 익스텐션 연결 후 90초 휴식",
-            "내일 하체 세션 대비: 요추 불필요한 과신전 금지, 코어 텐션 유지"
+            "해머 컬 휴식: 슈퍼세트 종료 후 90~120초 충분히 회복한 뒤 첫 세트 진입"
           ],
           exercises: [
             {
@@ -960,7 +959,7 @@
               name: '3. 사이드 레터럴 레이즈 (볼륨 타깃)',
               target: `덤벨 각 ${p.s3_lateral_raise_vol.weight}kg × ${p.s3_lateral_raise_vol.reps}회 × 3세트`,
               plate: calcPlateText(p.s3_lateral_raise_vol.weight, 'db'),
-              note: '45~60초의 짧은 휴식 인터벌로 대사 스트레스 유도. 반동 없이 엄격히 수행.',
+              note: '7kg 안착 성공. 승모근 개입 막고 최하단 정지 후 반동 없이 15회 완수.',
               rest: 60,
               type: 'standard',
               sets: [
@@ -988,12 +987,12 @@
               name: '5. 시티드 덤벨 해머 컬 (상완근·전완근)',
               target: `덤벨 각 ${p.s3_hammer_curl.weight}kg × ${p.s3_hammer_curl.reps}회 × 2세트`,
               plate: calcPlateText(p.s3_hammer_curl.weight, 'db'),
-              note: '상완근을 두껍게 만들어 상완 둘레 확장. 엄지손가락을 천장으로 올리며 컨트롤.',
-              rest: 60,
+              note: '슈퍼세트 후 90초 이상 충분히 쉬고 진입. 엄지손가락을 천장으로 올리며 컨트롤.',
+              rest: 75,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.s3_hammer_curl.reps}회)`, rest: 60, style: '' },
-                { label: `2세트 (${p.s3_hammer_curl.reps}회)`, rest: 60, style: '' }
+                { label: `1세트 (${p.s3_hammer_curl.reps}회)`, rest: 75, style: '' },
+                { label: `2세트 (${p.s3_hammer_curl.reps}회)`, rest: 75, style: '' }
               ]
             }
           ]
@@ -1003,12 +1002,13 @@
       if (day === 's4') {
         const sq = p.s4_squat_str;
         const dl = p.s4_deadlift_str;
+        const bg = p.s4_bulgarian_split;
         return {
           themeColor: '#10b981',
           guide: [
             "세션 목표: 3대 380kg 완벽 방어 및 저볼륨 집중 하체 (45~50분)",
             "정크 볼륨 0%: 스쿼트 3세트, 데드리프트 2세트로 스트렝스 신경계만 확실히 자극",
-            "가동 범위(Full ROM): 스쿼트는 고관절이 무릎 아래로 내려가는 깊이 통제",
+            "불가리안 스플릿 스쿼트: 덤벨 레그컬 대체 종목. 요추 부담 없이 둔근·햄스트링·사두 동시 자극",
             "러닝 주의: 하체 세션 전후 24시간 동안은 Zone 2 야외 러닝 금지 (신경계 피로 분리)"
           ],
           exercises: [
@@ -1044,16 +1044,16 @@
               ]
             },
             {
-              id: 's4_db_leg_curl',
-              name: '3. 덤벨 레그 컬 (평벤치 엎드려 수행)',
-              target: `발 사이 덤벨 ${p.s4_db_leg_curl.weight}kg × ${p.s4_db_leg_curl.reps}회 × 2세트`,
-              plate: calcPlateText(p.s4_db_leg_curl.weight, 'db'),
-              note: '발 사이에 덤벨을 끼우고 엎드려 네거티브 3초 통제. 햄스트링 단독 수축/신장.',
-              rest: 75,
+              id: 's4_bulgarian_split',
+              name: '3. 덤벨 불가리안 스플릿 스쿼트 (하체 후면·밸런스)',
+              target: `양손 각 ${bg.weight}kg × 좌우 각 ${bg.reps}회 × 2세트`,
+              plate: calcPlateText(bg.weight, 'db'),
+              note: '뒷발을 플랫벤치에 올리고 상체를 약간 숙여 수행. 최하단에서 둔근/햄스트링 신장 1초 정지.',
+              rest: 90,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.s4_db_leg_curl.reps}회)`, rest: 75, style: '' },
-                { label: `2세트 (${p.s4_db_leg_curl.reps}회)`, rest: 75, style: '' }
+                { label: `1세트 (좌/우 각 ${bg.reps}회)`, rest: 90, style: '' },
+                { label: `2세트 (좌/우 각 ${bg.reps}회)`, rest: 90, style: '' }
               ]
             },
             {

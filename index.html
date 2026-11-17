@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>HOMEGYM PRO · 4-SPLIT</title>
+  <title>HOMEGYM PRO · 3-SPLIT</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
@@ -102,9 +102,10 @@
       color: #fff;
     }
 
+    /* 3세션 순환 세그먼트 탭 */
     .segmented-tabs {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       background: var(--card-bg);
       padding: 4px;
       border-radius: 14px;
@@ -116,7 +117,7 @@
       background: transparent;
       border: none;
       border-radius: 10px;
-      padding: 9px 4px;
+      padding: 10px 4px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -126,11 +127,11 @@
       font-size: 0.62rem;
       font-weight: 600;
       color: var(--text-tertiary);
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
     .seg-main {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-secondary);
       letter-spacing: -0.02em;
@@ -534,7 +535,7 @@
   <header class="app-header">
     <div class="header-left">
       <div class="eyebrow">2026 HYPERTROPHY PROTOCOL</div>
-      <h1>HOMEGYM 4-SPLIT</h1>
+      <h1>HOMEGYM 3-SPLIT</h1>
     </div>
     <div class="header-right">
       <div class="cycle-pill" id="cycleBadge">CYCLE #1</div>
@@ -545,22 +546,19 @@
     </div>
   </header>
 
+  <!-- 3분할 순환 탭 -->
   <nav class="segmented-tabs">
-    <button class="seg-btn" data-day="s1" onclick="selectDay('s1')">
+    <button class="seg-btn active" data-day="s1" onclick="selectDay('s1')">
       <span class="seg-sub">SESSION 1</span>
       <span class="seg-main">Push · 삼두</span>
     </button>
     <button class="seg-btn" data-day="s2" onclick="selectDay('s2')">
       <span class="seg-sub">SESSION 2</span>
-      <span class="seg-main">Pull · 이두</span>
+      <span class="seg-main">Pull · 데드 · 이두</span>
     </button>
     <button class="seg-btn" data-day="s3" onclick="selectDay('s3')">
       <span class="seg-sub">SESSION 3</span>
-      <span class="seg-main">프레임 · 팔</span>
-    </button>
-    <button class="seg-btn active" data-day="s4" onclick="selectDay('s4')">
-      <span class="seg-sub">SESSION 4</span>
-      <span class="seg-main">하체 방어</span>
+      <span class="seg-main">프레임 · 로우 · 스쿼트</span>
     </button>
   </nav>
 
@@ -618,12 +616,12 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'homegym_4split_science_v2026_heavy';
+    const STORAGE_KEY = 'homegym_3split_science_v2026_pro';
 
     const defaultData = {
       cycleCount: 1,
       hasMicroPlate: true,
-      currentDay: 's4',
+      currentDay: 's1',
       checkedSets: {},
       progression: {
         // [Session 1: 상체 Push & 삼두]
@@ -637,33 +635,27 @@
         s1_lying_tri_ext: { weight: 25.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
         s1_cable_pushdown: { weight: 15.0, reps: 12, maxReps: 15, stepW: 2.5, type: 'double' },
 
-        // [Session 2: 상체 Pull & 이두]
-        s2_barbell_row: {
-          topW: 77.5, topReps: 7, maxTopReps: 8,
-          backW: 70.0, backReps: 8, maxBackReps: 10,
-          stepW: 2.5, type: 'top_backoff'
-        },
+        // [Session 2: 상체 Pull · 데드리프트 · 이두]
+        s2_deadlift_str: { weight: 125.0, reps: 5, maxReps: 6, stepW: 5.0, type: 'linear_hybrid' },
         s2_body_pullup: { reps: 8, maxReps: 10, stepW: 0, type: 'reps_only' },
         s2_one_arm_row: { weight: 28.0, reps: 11, maxReps: 12, stepW: 2.0, type: 'double' },
         s2_cable_facepull: { weight: 15.0, reps: 16, maxReps: 20, stepW: 2.5, type: 'double' },
         s2_bayesian_curl: { weight: 10.0, reps: 10, maxReps: 12, stepW: 2.5, type: 'double' },
 
-        // [Session 3: 상체 프레임 & 팔 슈퍼세트]
+        // [Session 3: 상체 프레임 · 바벨로우 · 스쿼트 · 팔 슈퍼세트]
         s3_ohp: {
           topW: 47.5, topReps: 7, maxTopReps: 8,
           backW: 42.5, backReps: 8, maxBackReps: 10,
           stepW: 2.5, type: 'top_backoff'
         },
-        s3_cable_arm_pulldown: { weight: 20.0, reps: 13, maxReps: 15, stepW: 2.5, type: 'double' },
+        s3_barbell_row: {
+          topW: 77.5, topReps: 7, maxTopReps: 8,
+          backW: 70.0, backReps: 8, maxBackReps: 10,
+          stepW: 2.5, type: 'top_backoff'
+        },
+        s3_squat_maint: { weight: 95.0, reps: 5, maxReps: 6, stepW: 2.5, type: 'linear_hybrid' },
         s3_lateral_raise_vol: { weight: 7.0, reps: 15, maxReps: 20, stepW: 1.0, type: 'double' },
-        s3_super_arms: { curlW: 25.0, extW: 16.0, reps: 11, maxReps: 12, stepW: 2.5, type: 'super_arms' },
-        s3_hammer_curl: { weight: 12.0, reps: 10, maxReps: 12, stepW: 1.0, type: 'double' },
-
-        // [Session 4: 하체 3대 380 방어]
-        s4_squat_str: { weight: 110.0, reps: 5, maxReps: 6, stepW: 2.5, type: 'linear_hybrid' },
-        s4_deadlift_str: { weight: 130.0, reps: 5, maxReps: 6, stepW: 5.0, type: 'linear_hybrid' },
-        s4_bulgarian_split: { weight: 12.0, reps: 10, maxReps: 12, stepW: 2.0, type: 'double' },
-        s4_hanging_leg_raise: { reps: 15, maxReps: 20, stepW: 0, type: 'reps_only' }
+        s3_super_arms: { curlW: 25.0, extW: 16.0, reps: 11, maxReps: 12, stepW: 2.5, type: 'super_arms' }
       }
     };
 
@@ -729,9 +721,9 @@
         return {
           accent: '#0a84ff',
           guide: [
-            "세션 목표: 상체 전면 프레임 및 삼두 근비대 (70~75분 완결)",
+            "세션 목표: 상체 전면 프레임 및 삼두 근비대 (70분 완결)",
             "바벨 로우 인클라인: 벤치 1칸(약 15도) 세팅. 최하단 쇄골 아래 1초 정지로 반동 완전 제거",
-            "삼두 피로 관리: 라트익 후 사전 소진을 감안해 푸쉬다운은 15kg 내외로 정확한 반복수 완수",
+            "삼두 피로 관리: 라트익 후 사전 소진을 감안해 푸쉬다운은 15kg으로 정확한 반복수 완수",
             "RIR 원칙: 다관절은 RIR 1~2 엄수, 고립 세트 마지막에서만 한계 도달 허용"
           ],
           exercises: [
@@ -813,31 +805,29 @@
       }
 
       if (day === 's2') {
-        const br = p.s2_barbell_row;
+        const dl = p.s2_deadlift_str;
         return {
           accent: '#30d158',
           guide: [
-            "세션 목표: 등 전체 두께/너비 및 이두 장두 신장 (70~75분)",
-            "바벨 로우: 상체 45도 숙이고 복압 단단히 고정. 배꼽 쪽으로 당기며 등 하부 및 중부 수축",
+            "세션 목표: 후면 사슬(데드리프트) 스트렝스 & 광배 너비·이두 장두 (70분)",
+            "요추 보호 배치: 데드리프트 2세트 후 기립근 피로가 없는 풀업과 원암 덤벨 로우로 등 볼륨 완성",
             "풀업 보조: 맨몸 정자세 한계 도달 시 다음 세트는 밴드 보조로 Full ROM(데드행→쇄골 터치) 사수",
-            "베이시안 케이블 컬: 10kg 덤벨 부재를 대체하여 케이블 최하단 세팅 후 장두 최대 신장 자극"
+            "베이시안 케이블 컬: 최하단 도르래 세팅 후 팔꿈치를 몸 뒤에 고정하여 이두 장두 최대 신장"
           ],
           exercises: [
             {
-              id: 's2_barbell_row',
-              name: '1. 바벨 로우 (상체 45도 복압 유지)',
-              target: `Top ${br.topW}kg × ${br.topReps}회 + Back ${br.backW}kg × ${br.backReps}회 2세트`,
-              plate: `Top: ${calcPlateText(br.topW, 'barbell')}  |  Back: ${calcPlateText(br.backW, 'barbell')}`,
-              note: '최하단 1초 정지 후 반동 없이 폭발적 당기기. 요추 굴곡 엄금, RIR 1~2 엄수.',
-              rest: 150,
-              type: 'top_backoff',
+              id: 's2_deadlift_str',
+              name: '1. 컨벤셔널 / 루마니안 데드리프트 (메인)',
+              target: `${dl.weight}kg × ${dl.reps}회 × 2세트 (폭발적 힌지)`,
+              plate: calcPlateText(dl.weight, 'barbell'),
+              note: '10mm 벨트 + 스트랩 착용. 바닥을 발로 밀어내는 레그프레스 큐. 척추 중립 고정, RIR 1~2.',
+              rest: 180,
+              type: 'standard',
               sets: [
-                { label: '웜업 20kg×10', rest: 60, style: '' },
-                { label: '웜업 50kg×5', rest: 75, style: '' },
-                { label: '웜업 67.5kg×3', rest: 90, style: '' },
-                { label: `Top ${br.topW}kg×${br.topReps}`, rest: 150, style: 'is-top' },
-                { label: `Back 1 (${br.backW}kg×${br.backReps})`, rest: 120, style: 'is-back' },
-                { label: `Back 2 (${br.backW}kg×${br.backReps})`, rest: 120, style: 'is-back' }
+                { label: '웜업 70kg×5', rest: 90, style: '' },
+                { label: '웜업 100kg×3', rest: 120, style: '' },
+                { label: `1세트 (${dl.weight}kg×${dl.reps})`, rest: 180, style: 'is-top' },
+                { label: `2세트 (${dl.weight}kg×${dl.reps})`, rest: 180, style: 'is-top' }
               ]
             },
             {
@@ -901,19 +891,21 @@
 
       if (day === 's3') {
         const oh = p.s3_ohp;
+        const br = p.s3_barbell_row;
+        const sq = p.s3_squat_maint;
         const sa = p.s3_super_arms;
         return {
           accent: '#bf5af2',
           guide: [
-            "세션 목표: 어깨 프레임 입체감 & 팔 슈퍼세트 집중 타격 (70분)",
-            "OHP: 코어와 둔근을 단단히 조이고 수직 궤적으로 프레스. 쇄골 최하단 1초 정지 후 폭발",
-            "팔 슈퍼세트: 바이셉스 컬 직후 쉬지 않고 오버헤드 익스텐션 연결 후 90초 휴식",
-            "해머 컬 휴식: 슈퍼세트 종료 후 90~120초 충분히 회복한 뒤 첫 세트 진입"
+            "세션 목표: 어깨 프레임 · 바벨로우 두께 · 스쿼트 3대 방어 · 팔 슈퍼세트 (75분)",
+            "분리 배치 효과: 데드리프트와 다른 날에 바벨로우를 배치하여 요추 피로 없이 고중량 수행",
+            "스쿼트 유지 볼륨: 95kg 2세트로 대퇴사두와 신경계 자극만 깔끔하게 챙기고 다음 날 당직 휴식",
+            "팔 슈퍼세트: 바벨 컬 직후 쉬지 않고 오버헤드 익스텐션 연결 후 90초 휴식"
           ],
           exercises: [
             {
               id: 's3_ohp',
-              name: '1. 오버헤드 프레스 (OHP / 스트렝스 메인)',
+              name: '1. 오버헤드 프레스 (OHP / 수직 프레스)',
               target: `Top ${oh.topW}kg × ${oh.topReps}회 + Back ${oh.backW}kg × ${oh.backReps}회 2세트`,
               plate: `Top: ${calcPlateText(oh.topW, 'barbell')}  |  Back: ${calcPlateText(oh.backW, 'barbell')}`,
               note: '둔근과 복근을 락아웃하여 허리 꺾임 방지. 쇄골 터치 후 1초 정지, RIR 1~2 엄수.',
@@ -928,25 +920,41 @@
               ]
             },
             {
-              id: 's3_cable_arm_pulldown',
-              name: '2. 케이블 암 풀다운 (광배근 고립)',
-              target: `${p.s3_cable_arm_pulldown.weight}kg × ${p.s3_cable_arm_pulldown.reps}회 × 3세트`,
-              plate: calcPlateText(p.s3_cable_arm_pulldown.weight, 'cable'),
-              note: '팔꿈치 살짝 굽혀 고정하고 허벅지 쪽으로 부채꼴 호를 그리며 광배 하부 수축.',
-              rest: 75,
+              id: 's3_barbell_row',
+              name: '2. 바벨 로우 (상체 45도 등 두께 메인)',
+              target: `Top ${br.topW}kg × ${br.topReps}회 + Back ${br.backW}kg × ${br.backReps}회 2세트`,
+              plate: `Top: ${calcPlateText(br.topW, 'barbell')}  |  Back: ${calcPlateText(br.backW, 'barbell')}`,
+              note: '스트랩 착용 권장. 최하단 1초 정지 후 반동 없이 배꼽 방향으로 폭발적 당기기.',
+              rest: 120,
+              type: 'top_backoff',
+              sets: [
+                { label: '웜업 50kg×5', rest: 60, style: '' },
+                { label: `Top ${br.topW}kg×${br.topReps}`, rest: 120, style: 'is-top' },
+                { label: `Back 1 (${br.backW}kg×${br.backReps})`, rest: 90, style: 'is-back' },
+                { label: `Back 2 (${br.backW}kg×${br.backReps})`, rest: 90, style: 'is-back' }
+              ]
+            },
+            {
+              id: 's3_squat_maint',
+              name: '3. 바벨 백스쿼트 (3대 스트렝스 유지 컴팩트)',
+              target: `${sq.weight}kg × ${sq.reps}회 × 2세트 (Full ROM)`,
+              plate: calcPlateText(sq.weight, 'barbell'),
+              note: '10mm 벨트 착용. 무리한 고중량 대신 95kg에서 정자세 풀스쿼트로 대퇴사두와 신경계만 유지.',
+              rest: 150,
               type: 'standard',
               sets: [
-                { label: `1세트 (${p.s3_cable_arm_pulldown.reps}회)`, rest: 75, style: '' },
-                { label: `2세트 (${p.s3_cable_arm_pulldown.reps}회)`, rest: 75, style: '' },
-                { label: `3세트 (${p.s3_cable_arm_pulldown.reps}회)`, rest: 75, style: '' }
+                { label: '웜업 60kg×5', rest: 75, style: '' },
+                { label: '웜업 80kg×3', rest: 90, style: '' },
+                { label: `1세트 (${sq.weight}kg×${sq.reps})`, rest: 150, style: 'is-top' },
+                { label: `2세트 (${sq.weight}kg×${sq.reps})`, rest: 150, style: 'is-top' }
               ]
             },
             {
               id: 's3_lateral_raise_vol',
-              name: '3. 사이드 레터럴 레이즈 (볼륨 타깃)',
+              name: '4. 사이드 레터럴 레이즈 (측면 삼각근 볼륨)',
               target: `덤벨 각 ${p.s3_lateral_raise_vol.weight}kg × ${p.s3_lateral_raise_vol.reps}회 × 3세트`,
               plate: calcPlateText(p.s3_lateral_raise_vol.weight, 'db'),
-              note: '7kg 안착 성공. 승모근 개입 막고 최하단 정지 후 반동 없이 15회 완수.',
+              note: '승모근 개입 막고 최하단 정지 후 반동 없이 15회 완수.',
               rest: 60,
               type: 'standard',
               sets: [
@@ -957,7 +965,7 @@
             },
             {
               id: 's3_super_arms',
-              name: '4. [슈퍼세트] 바벨 컬 + 오버헤드 익스텐션',
+              name: '5. [슈퍼세트] 바벨 컬 + 오버헤드 익스텐션',
               target: `바벨 컬 ${sa.curlW}kg × ${sa.reps}회 + 익스텐션 ${sa.extW}kg × 12회 (3세트)`,
               plate: `바벨 컬: ${calcPlateText(sa.curlW, 'barbell')}  |  익스텐션: 덤벨 ${sa.extW}kg`,
               note: '이두 컬 끝나자마자 쉬지 않고 즉시 삼두 익스텐션 진행! 1세트 종료 후 90초 휴식.',
@@ -967,94 +975,6 @@
                 { label: '슈퍼세트 1R 완수', rest: 90, style: 'is-super' },
                 { label: '슈퍼세트 2R 완수', rest: 90, style: 'is-super' },
                 { label: '슈퍼세트 3R 완수', rest: 90, style: 'is-super' }
-              ]
-            },
-            {
-              id: 's3_hammer_curl',
-              name: '5. 시티드 덤벨 해머 컬 (상완근·전완근)',
-              target: `덤벨 각 ${p.s3_hammer_curl.weight}kg × ${p.s3_hammer_curl.reps}회 × 2세트`,
-              plate: calcPlateText(p.s3_hammer_curl.weight, 'db'),
-              note: '슈퍼세트 후 90초 이상 충분히 쉬고 진입. 엄지손가락을 천장으로 올리며 컨트롤.',
-              rest: 75,
-              type: 'standard',
-              sets: [
-                { label: `1세트 (${p.s3_hammer_curl.reps}회)`, rest: 75, style: '' },
-                { label: `2세트 (${p.s3_hammer_curl.reps}회)`, rest: 75, style: '' }
-              ]
-            }
-          ]
-        };
-      }
-
-      if (day === 's4') {
-        const sq = p.s4_squat_str;
-        const dl = p.s4_deadlift_str;
-        const bg = p.s4_bulgarian_split;
-        return {
-          accent: '#ff9f0a',
-          guide: [
-            "세션 목표: 6일 순환 주기 3대 380kg 방어 & 고강도 하체 (45~50분)",
-            "메인 상향 세팅: 6일 주기에 맞춰 스쿼트 110kg, 데드리프트 130kg으로 신경계 자극 강화",
-            "불가리안 스플릿 스쿼트: 뒷발을 벤치에 올리고 최하단 둔근·햄스트링 신장 1초 정지",
-            "러닝 주의: 하체 세션 전후 24시간 동안은 Zone 2 야외 러닝 절대 금지"
-          ],
-          exercises: [
-            {
-              id: 's4_squat_str',
-              name: '1. 바벨 백스쿼트 (3대 스트렝스 방어)',
-              target: `${sq.weight}kg × ${sq.reps}회 × 3세트 (Full ROM)`,
-              plate: calcPlateText(sq.weight, 'barbell'),
-              note: '10mm 리프팅 벨트 착용. 최하단 깊이 통제 후 반동 없이 폭발적으로 기립 (RIR 1~2 엄수).',
-              rest: 150,
-              type: 'standard',
-              sets: [
-                { label: '웜업 60kg×5', rest: 90, style: '' },
-                { label: '웜업 90kg×3', rest: 120, style: '' },
-                { label: `1세트 (${sq.weight}kg×${sq.reps})`, rest: 150, style: 'is-top' },
-                { label: `2세트 (${sq.weight}kg×${sq.reps})`, rest: 150, style: 'is-top' },
-                { label: `3세트 (${sq.weight}kg×${sq.reps})`, rest: 150, style: 'is-top' }
-              ]
-            },
-            {
-              id: 's4_deadlift_str',
-              name: '2. 컨벤셔널 / 루마니안 데드리프트',
-              target: `${dl.weight}kg × ${dl.reps}회 × 2세트 (폭발적 힌지)`,
-              plate: calcPlateText(dl.weight, 'barbell'),
-              note: '스트랩 착용. 바닥을 발로 밀어내는 레그프레스 큐. 척추 중립 고정, RIR 1~2.',
-              rest: 180,
-              type: 'standard',
-              sets: [
-                { label: '웜업 70kg×5', rest: 90, style: '' },
-                { label: '웜업 105kg×3', rest: 120, style: '' },
-                { label: `1세트 (${dl.weight}kg×${dl.reps})`, rest: 180, style: 'is-top' },
-                { label: `2세트 (${dl.weight}kg×${dl.reps})`, rest: 180, style: 'is-top' }
-              ]
-            },
-            {
-              id: 's4_bulgarian_split',
-              name: '3. 덤벨 불가리안 스플릿 스쿼트 (하체 후면·밸런스)',
-              target: `양손 각 ${bg.weight}kg × 좌우 각 ${bg.reps}회 × 2세트`,
-              plate: calcPlateText(bg.weight, 'db'),
-              note: '뒷발을 플랫벤치에 올리고 상체를 약간 숙여 수행. 최하단에서 둔근/햄스트링 신장 1초 정지.',
-              rest: 90,
-              type: 'standard',
-              sets: [
-                { label: `1세트 (좌/우 ${bg.reps}회)`, rest: 90, style: '' },
-                { label: `2세트 (좌/우 ${bg.reps}회)`, rest: 90, style: '' }
-              ]
-            },
-            {
-              id: 's4_hanging_leg_raise',
-              name: '4. 파워랙 행잉 레그레이즈',
-              target: `맨몸 × ${p.s4_hanging_leg_raise.reps}회 × 3세트`,
-              plate: '철봉 매달리기 (코어/복압 강화)',
-              note: '골반을 명치 쪽으로 말아올리며 하복부 자극. 척추 감압 효과 병행.',
-              rest: 60,
-              type: 'standard',
-              sets: [
-                { label: `1세트 (${p.s4_hanging_leg_raise.reps}회)`, rest: 60, style: '' },
-                { label: `2세트 (${p.s4_hanging_leg_raise.reps}회)`, rest: 60, style: '' },
-                { label: `3세트 (${p.s4_hanging_leg_raise.reps}회)`, rest: 60, style: '' }
               ]
             }
           ]
@@ -1287,10 +1207,10 @@
         });
       });
 
-      const order = { 's1': 's2', 's2': 's3', 's3': 's4', 's4': 's1' };
-      if (state.currentDay === 's4') {
+      const order = { 's1': 's2', 's2': 's3', 's3': 's1' };
+      if (state.currentDay === 's3') {
         state.cycleCount += 1;
-        summaryLog += `\n\n[4세션 1순환 완주] 사이클 #${state.cycleCount}가 시작됩니다.`;
+        summaryLog += `\n\n[3세션 1순환 완주] 사이클 #${state.cycleCount}가 시작됩니다.`;
       }
       state.currentDay = order[state.currentDay] || 's1';
 
